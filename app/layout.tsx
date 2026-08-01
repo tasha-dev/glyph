@@ -1,6 +1,9 @@
 import { RootLayoutProps } from "@/type/component";
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "next-themes";
 
 const APP_NAME = "Glyph";
 const APP_DESCRIPTION =
@@ -98,10 +101,17 @@ export const viewport: Viewport = {
    maximumScale: 1,
 };
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
 export default function RootLayout({ children }: RootLayoutProps) {
    return (
-      <html suppressHydrationWarning>
-         <body>{children}</body>
+      <html
+         suppressHydrationWarning
+         className={cn("font-sans", inter.variable)}
+      >
+         <ThemeProvider>
+            <body>{children}</body>
+         </ThemeProvider>
       </html>
    );
 }
