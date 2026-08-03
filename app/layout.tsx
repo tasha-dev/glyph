@@ -2,7 +2,7 @@ import { RootLayoutProps } from "@/type/component";
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/util";
 import { ThemeProvider } from "next-themes";
 
 const APP_NAME = "Glyph";
