@@ -13,6 +13,32 @@ import { VimMode, SelectionWithModify, BlockCursorRect } from "@/type/editor";
 
 const INSERT_CURSOR_WIDTH = 2; // thin bar, like Vim insert mode
 
+// Moves the head vertically by one visual line while trying to preserve
+// the horizontal "goal column" — this is the standard technique for
+// reliable up/down movement in a ProseMirror/contenteditable editor,
+// since Selection.modify("move","down","line") is unreliable across
+// separate block elements.
+function moveVertical(
+   view: EditorView,
+   dir: 1 | -1,
+   goalX: number | null,
+): { pos: number; x: number } | null {
+   const { head } = view.state.selection;
+   let coords;
+   try {
+      coords = view.coordsAtPos(head);
+   } catch {
+      return null;
+   }
+   const x = goalX ?? coords.left;
+   const lineHeight = coords.bottom - coords.top || 16;
+   const targetY =
+      dir === 1 ? coords.bottom + lineHeight / 2 : coords.top - lineHeight / 2;
+   const result = view.posAtCoords({ left: x, top: targetY });
+   if (!result) return null;
+   return { pos: result.pos, x };
+}
+
 export default function MarkdownEditor({
    initialMarkdown = "# Hello world",
    onChange,
@@ -22,44 +48,68 @@ export default function MarkdownEditor({
    const modeRef = useRef<VimMode>("normal");
    const pendingKeyRef = useRef<string | null>(null);
    const wrapperRef = useRef<HTMLDivElement>(null);
+   const anchorPosRef = useRef<number | null>(null); // visual-mode selection anchor
+   const goalColumnRef = useRef<number | null>(null); // preferred x for j/k
+
    const [cursorRect, setCursorRect] = useState<BlockCursorRect | null>(null);
+   const [selectionRects, setSelectionRects] = useState<BlockCursorRect[]>([]);
 
    const setVimMode = (m: VimMode) => {
       modeRef.current = m;
       setMode(m);
    };
 
+   // ---- Custom cursor + selection-highlight calculation ----
    function updateCursor(view: EditorView) {
       const wrapper = wrapperRef.current;
       if (!wrapper) return;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const { from, to, head } = view.state.selection;
 
-      const { from } = view.state.selection;
+      // --- selection highlight (visual mode only, non-empty range) ---
+      if (modeRef.current === "visual" && from !== to) {
+         try {
+            const start = view.domAtPos(Math.min(from, to));
+            const end = view.domAtPos(Math.max(from, to));
+            const range = document.createRange();
+            range.setStart(start.node, start.offset);
+            range.setEnd(end.node, end.offset);
+            const rects = Array.from(range.getClientRects()).map((r) => ({
+               top: r.top - wrapperRect.top,
+               left: r.left - wrapperRect.left,
+               width: r.width,
+               height: r.height,
+            }));
+            setSelectionRects(rects);
+         } catch {
+            setSelectionRects([]);
+         }
+      } else {
+         setSelectionRects([]);
+      }
 
+      // --- caret / block cursor, always tracks the selection HEAD ---
       let startCoords;
       try {
-         startCoords = view.coordsAtPos(from);
+         startCoords = view.coordsAtPos(head);
       } catch {
          setCursorRect(null);
          return;
       }
-
-      const wrapperRect = wrapper.getBoundingClientRect();
       const height = startCoords.bottom - startCoords.top;
       const top = startCoords.top - wrapperRect.top;
       const left = startCoords.left - wrapperRect.left;
 
       if (modeRef.current === "insert") {
-         // thin bar cursor — fixed width, sits right at the caret position
          setCursorRect({ top, left, width: INSERT_CURSOR_WIDTH, height });
          return;
       }
 
-      // normal mode — block cursor, width = width of char under cursor
       let width = 8;
       const docSize = view.state.doc.content.size;
-      if (from < docSize) {
+      if (head < docSize) {
          try {
-            const endCoords = view.coordsAtPos(from + 1);
+            const endCoords = view.coordsAtPos(head + 1);
             const measured = endCoords.left - startCoords.left;
             if (measured > 0 && measured < 40) width = measured;
          } catch {
@@ -71,25 +121,127 @@ export default function MarkdownEditor({
 
    function handleKeyDown(view: EditorView, event: KeyboardEvent): boolean {
       if (event.metaKey || event.ctrlKey || event.altKey) return false;
+
+      // ---------- INSERT MODE ----------
       if (modeRef.current === "insert") {
          if (event.key === "Escape") {
             event.preventDefault();
             setVimMode("normal");
             updateCursor(view);
             return true;
-         } else {
-            return false;
          }
+         return false;
       }
 
-      // Normal Mode
+      const { state, dispatch } = view;
+      const key = event.key;
       const sel = (
          typeof window !== "undefined" ? window.getSelection() : null
       ) as SelectionWithModify | null;
-      const { state, dispatch } = view;
-      const key = event.key;
 
-      // handle two-key "dd" (delete current block)
+      // ---------- VISUAL MODE ----------
+      if (modeRef.current === "visual") {
+         switch (key) {
+            case "Escape":
+            case "v": {
+               event.preventDefault();
+               const headPos = state.selection.head;
+               anchorPosRef.current = null;
+               goalColumnRef.current = null;
+               setVimMode("normal");
+               dispatch(
+                  state.tr.setSelection(
+                     TextSelection.create(state.doc, headPos),
+                  ),
+               );
+               updateCursor(view);
+               return true;
+            }
+
+            case "h":
+               event.preventDefault();
+               goalColumnRef.current = null;
+               sel?.modify("extend", "left", "character");
+               updateCursor(view);
+               return true;
+
+            case "l":
+               event.preventDefault();
+               goalColumnRef.current = null;
+               sel?.modify("extend", "right", "character");
+               updateCursor(view);
+               return true;
+
+            case "w":
+               event.preventDefault();
+               goalColumnRef.current = null;
+               sel?.modify("extend", "right", "word");
+               updateCursor(view);
+               return true;
+
+            case "b":
+               event.preventDefault();
+               goalColumnRef.current = null;
+               sel?.modify("extend", "left", "word");
+               updateCursor(view);
+               return true;
+
+            case "0":
+               event.preventDefault();
+               goalColumnRef.current = null;
+               sel?.modify("extend", "left", "lineboundary");
+               updateCursor(view);
+               return true;
+
+            case "$":
+               event.preventDefault();
+               goalColumnRef.current = null;
+               sel?.modify("extend", "right", "lineboundary");
+               updateCursor(view);
+               return true;
+
+            case "j":
+            case "k": {
+               event.preventDefault();
+               const moved = moveVertical(
+                  view,
+                  key === "j" ? 1 : -1,
+                  goalColumnRef.current,
+               );
+               if (moved && anchorPosRef.current !== null) {
+                  goalColumnRef.current = moved.x;
+                  const newSel = TextSelection.create(
+                     state.doc,
+                     anchorPosRef.current,
+                     moved.pos,
+                  );
+                  dispatch(state.tr.setSelection(newSel));
+                  updateCursor(view);
+               }
+               return true;
+            }
+
+            case "x":
+            case "d": {
+               event.preventDefault();
+               const { from, to } = state.selection;
+               if (from !== to) {
+                  dispatch(state.tr.delete(from, to));
+               }
+               anchorPosRef.current = null;
+               goalColumnRef.current = null;
+               setVimMode("normal");
+               updateCursor(view);
+               return true;
+            }
+
+            default:
+               event.preventDefault();
+               return true;
+         }
+      }
+
+      // ---------- NORMAL MODE ----------
       if (pendingKeyRef.current === "d") {
          pendingKeyRef.current = null;
          if (key === "d") {
@@ -104,14 +256,24 @@ export default function MarkdownEditor({
       }
 
       switch (key) {
+         case "v":
+            event.preventDefault();
+            anchorPosRef.current = state.selection.from;
+            goalColumnRef.current = null;
+            setVimMode("visual");
+            updateCursor(view);
+            return true;
+
          case "i":
             event.preventDefault();
+            goalColumnRef.current = null;
             setVimMode("insert");
             updateCursor(view);
             return true;
 
          case "a":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "right", "character");
             setVimMode("insert");
             updateCursor(view);
@@ -119,6 +281,7 @@ export default function MarkdownEditor({
 
          case "A":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "right", "lineboundary");
             setVimMode("insert");
             updateCursor(view);
@@ -126,6 +289,7 @@ export default function MarkdownEditor({
 
          case "I":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "left", "lineboundary");
             setVimMode("insert");
             updateCursor(view);
@@ -133,6 +297,7 @@ export default function MarkdownEditor({
 
          case "o": {
             event.preventDefault();
+            goalColumnRef.current = null;
             const { $from } = state.selection;
             const pos = $from.after($from.depth);
             const paragraph = state.schema.nodes.paragraph.create();
@@ -146,6 +311,7 @@ export default function MarkdownEditor({
 
          case "O": {
             event.preventDefault();
+            goalColumnRef.current = null;
             const { $from } = state.selection;
             const pos = $from.before($from.depth);
             const paragraph = state.schema.nodes.paragraph.create();
@@ -159,54 +325,79 @@ export default function MarkdownEditor({
 
          case "h":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "left", "character");
             updateCursor(view);
             return true;
 
          case "l":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "right", "character");
             updateCursor(view);
             return true;
 
-         case "j":
+         case "j": {
             event.preventDefault();
-            sel?.modify("move", "down", "line");
-            updateCursor(view);
+            const moved = moveVertical(view, 1, goalColumnRef.current);
+            if (moved) {
+               goalColumnRef.current = moved.x;
+               dispatch(
+                  state.tr.setSelection(
+                     TextSelection.create(state.doc, moved.pos),
+                  ),
+               );
+               updateCursor(view);
+            }
             return true;
+         }
 
-         case "k":
+         case "k": {
             event.preventDefault();
-            sel?.modify("move", "up", "line");
-            updateCursor(view);
+            const moved = moveVertical(view, -1, goalColumnRef.current);
+            if (moved) {
+               goalColumnRef.current = moved.x;
+               dispatch(
+                  state.tr.setSelection(
+                     TextSelection.create(state.doc, moved.pos),
+                  ),
+               );
+               updateCursor(view);
+            }
             return true;
+         }
 
          case "w":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "right", "word");
             updateCursor(view);
             return true;
 
          case "b":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "left", "word");
             updateCursor(view);
             return true;
 
          case "0":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "left", "lineboundary");
             updateCursor(view);
             return true;
 
          case "$":
             event.preventDefault();
+            goalColumnRef.current = null;
             sel?.modify("move", "right", "lineboundary");
             updateCursor(view);
             return true;
 
          case "x": {
             event.preventDefault();
+            goalColumnRef.current = null;
             const { from } = state.selection;
             if (from < state.doc.content.size) {
                dispatch(state.tr.delete(from, from + 1));
@@ -238,11 +429,12 @@ export default function MarkdownEditor({
       content: initialMarkdown,
       contentType: "markdown",
       immediatelyRender: false,
+      autofocus: true,
       editorProps: {
          attributes: {
             spellcheck: "false",
             class: cn(
-               "outline-none p-4 prose prose-neutral mx-auto w-full max-w-2xl dark:prose-invert caret-transparent relative",
+               "outline-none p-4 prose prose-neutral mx-auto w-full max-w-2xl dark:prose-invert caret-transparent relative selection:bg-foreground selection:text-background",
             ),
          },
          handleKeyDown,
@@ -267,9 +459,7 @@ export default function MarkdownEditor({
                   <EditorContent editor={editor} />
                   {cursorRect && (
                      <div
-                        className={cn(
-                           "absolute pointer-events-none animate-pulse duration-100 bg-foreground",
-                        )}
+                        className="absolute pointer-events-none animate-pulse duration-100 bg-foreground"
                         style={{
                            top: cursorRect.top,
                            left: cursorRect.left,
@@ -285,15 +475,20 @@ export default function MarkdownEditor({
             <div
                className={cn(
                   "flex items-center justify-between gap-4 px-4 text-xs font-mono text-white transition-colors h-10",
-                  mode === "insert" ? "bg-fuchsia-500" : "bg-sky-500",
+                  mode === "insert" && "bg-fuchsia-500",
+                  mode === "normal" && "bg-sky-500",
+                  mode === "visual" && "bg-amber-500",
                )}
             >
                <span className="font-bold tracking-wide shrink-0">
-                  {mode === "insert" ? "-- INSERT --" : "-- NORMAL --"}
+                  {mode === "insert" && "-- INSERT --"}
+                  {mode === "normal" && "-- NORMAL --"}
+                  {mode === "visual" && "-- VISUAL --"}
                </span>
                <span className="opacity-90 hidden md:inline truncate">
-                  i:insert · a/A:append · I:start · o/O:new-line · hjkl:move ·
-                  w/b:word · 0/$:line · x:del-char · dd:del-line · Esc:normal
+                  {mode === "visual"
+                     ? "hjkl:move · w/b:word · 0/$:line · d/x:delete-selection · v/Esc:normal"
+                     : "i:insert · a/A:append · I:start · o/O:new-line · v:visual · hjkl:move · w/b:word · 0/$:line · x:del-char · dd:del-line · Esc:normal"}
                </span>
             </div>
          </div>
