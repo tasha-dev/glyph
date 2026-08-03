@@ -69,3 +69,19 @@ export function wordEndPos(view: EditorView, pos: number): number {
    }
    return Math.min(p, size);
 }
+
+export function insertImageFile(view: EditorView, file: File, pos?: number) {
+   if (!file.type.startsWith("image/")) return false;
+
+   const reader = new FileReader();
+   reader.onload = () => {
+      const src = reader.result as string; // data:image/png;base64,...
+      const { schema } = view.state;
+      const node = schema.nodes.image.create({ src });
+      const insertPos = pos ?? view.state.selection.from;
+      const tr = view.state.tr.insert(insertPos, node);
+      view.dispatch(tr);
+   };
+   reader.readAsDataURL(file);
+   return true;
+}

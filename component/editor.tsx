@@ -1,13 +1,14 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import CodeBlockShiki from "tiptap-extension-code-block-shiki";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "@tiptap/markdown";
 import { TextSelection } from "@tiptap/pm/state";
 import { undo, redo } from "@tiptap/pm/history";
 import type { EditorView } from "@tiptap/pm/view";
 import { useRef, useState } from "react";
-import { cn } from "@/lib/util";
+import { cn, insertImageFile } from "@/lib/util";
 import { EditorProps } from "@/type/component";
 import { ScrollArea } from "@/component/ui/scroll-area";
 import { VimMode, SelectionWithModify, BlockCursorRect } from "@/type/editor";
@@ -17,6 +18,17 @@ import {
    moveVertical,
    resolveMotion,
 } from "@/lib/editor";
+import { Table } from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import { TaskList, TaskItem } from "@tiptap/extension-list";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import Underline from "@tiptap/extension-underline";
+import Highlight from "@tiptap/extension-highlight";
+import Typography from "@tiptap/extension-typography";
+import vesperTheme from "@/lib/vesperSyntaxTheme";
 
 const INSERT_CURSOR_WIDTH = 2;
 
@@ -608,19 +620,72 @@ export default function MarkdownEditor({
    }
 
    const editor = useEditor({
-      extensions: [StarterKit, Markdown],
+      extensions: [
+         StarterKit.configure({ codeBlock: false }),
+         CodeBlockShiki.configure({
+            defaultTheme: "vesper",
+            customThemes: [vesperTheme],
+         }),
+         Table.configure({ resizable: true }),
+         TableRow,
+         TableHeader,
+         TableCell,
+         TaskList,
+         TaskItem.configure({ nested: true }),
+         Link.configure({ openOnClick: false, autolink: true }),
+         Image,
+         Underline,
+         Highlight,
+         Typography, // smart quotes, em-dashes, (c) → ©, etc.
+         Markdown.configure({
+            markedOptions: { gfm: true }, // enables tables + task lists in Markdown parsing
+         }),
+      ],
       content: initialMarkdown,
       contentType: "markdown",
       immediatelyRender: false,
       autofocus: true,
       editorProps: {
+         handleKeyDown,
          attributes: {
             spellcheck: "false",
             class: cn(
                "outline-none p-4 prose prose-neutral mx-auto w-full max-w-2xl dark:prose-invert caret-transparent relative selection:bg-foreground selection:text-background",
+               "[&_table]:border [&_table]:border-border [&_td]:border [&_td]:border-border [&_th]:border [&_th]:border-border [&_td]:p-2 [&_th]:p-2",
+               "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0",
+               "[&_a]:text-sky-500 [&_a]:underline",
+               "[&_img]:w-full [&_img]:object-cover [&_img]:rounded-lg [&_img]:block",
+               "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0 [&_ul[data-type=taskList]]:space-y-1",
+               "[&_ul[data-type=taskList]_li]:flex [&_ul[data-type=taskList]_li]:items-start [&_ul[data-type=taskList]_li]:gap-2",
+               "[&_ul[data-type=taskList]_li>div]:flex-1 [&_ul[data-type=taskList]_li>div>p]:m-0",
+               "[&_li[data-checked=true]>div]:line-through [&_li[data-checked=true]>div]:text-foreground/40",
             ),
          },
-         handleKeyDown,
+         handlePaste: (view, event) => {
+            const items = event.clipboardData?.items;
+            if (!items) return false;
+            for (const item of items) {
+               if (item.type.startsWith("image/")) {
+                  const file = item.getAsFile();
+                  if (file) {
+                     event.preventDefault();
+                     return insertImageFile(view, file);
+                  }
+               }
+            }
+            return false;
+         },
+         handleDrop: (view, event) => {
+            const files = event.dataTransfer?.files;
+            if (!files || files.length === 0) return false;
+            const file = files[0];
+            if (!file.type.startsWith("image/")) return false;
+
+            event.preventDefault();
+            const coords = { left: event.clientX, top: event.clientY };
+            const pos = view.posAtCoords(coords)?.pos;
+            return insertImageFile(view, file, pos);
+         },
       },
       onCreate: ({ editor }) => {
          updateCursor(editor.view);
