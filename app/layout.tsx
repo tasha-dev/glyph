@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/util";
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/component/ui/tooltip";
 
 const APP_NAME = "Glyph";
 const APP_DESCRIPTION =
@@ -110,7 +111,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
          className={cn("font-sans", inter.variable)}
       >
          <ThemeProvider>
-            <body>{children}</body>
+            <body>
+               <TooltipProvider>{children}</TooltipProvider>
+            </body>
          </ThemeProvider>
       </html>
    );

@@ -3,8 +3,10 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Markdown } from "@tiptap/markdown";
+import { ClassOnlyProps } from "@/type/component";
+import { cn } from "@/lib/util";
 
-export default function Editor() {
+export default function Editor({ className }: ClassOnlyProps) {
    const editor = useEditor({
       extensions: [StarterKit, Markdown],
       content: "# Hello world",
@@ -18,6 +20,14 @@ export default function Editor() {
    });
 
    if (editor) {
-      return <EditorContent editor={editor} />;
+      return (
+         <EditorContent
+            editor={editor}
+            className={cn(
+               "max-w-full prose prose-neutral dark:prose-invert w-full",
+               className,
+            )}
+         />
+      );
    }
 }
