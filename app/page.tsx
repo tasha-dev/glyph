@@ -1,7 +1,7 @@
 "use client";
 
 import Editor from "@/component/editor";
-import ThemeToggler from "@/component/themeToggler";
+import Toolbar from "@/component/toolbar";
 import { useRef } from "react";
 
 export default function HomePage() {
@@ -9,7 +9,7 @@ export default function HomePage() {
 
    return (
       <section className="relative z-0">
-         <ThemeToggler className="fixed top-3 right-3 z-10" />
+         <Toolbar className="fixed top-4 right-4 z-10" />
          <main onClick={() => editorRef.current?.focus()}>
             <Editor ref={editorRef} />
          </main>
