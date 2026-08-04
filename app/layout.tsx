@@ -1,7 +1,7 @@
 import { RootLayoutProps } from "@/type/component";
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Vazirmatn } from "next/font/google";
 import { cn } from "@/lib/util";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/component/ui/tooltip";
@@ -103,12 +103,15 @@ export const viewport: Viewport = {
 };
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const vazir = Vazirmatn({
+   variable: "--font-vazir",
+});
 
 export default function RootLayout({ children }: RootLayoutProps) {
    return (
       <html
          suppressHydrationWarning
-         className={cn("font-sans", inter.variable)}
+         className={cn(inter.className, vazir.className)}
       >
          <ThemeProvider>
             <body>

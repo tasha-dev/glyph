@@ -10,4 +10,5 @@ export interface EditorProps {
    className?: string;
    initialMarkdown?: string;
    onChange?: (markdown: string) => void;
+   ref?: React.RefObject<HTMLDivElement | null>;
 }

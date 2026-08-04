@@ -6,8 +6,8 @@ import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "@tiptap/markdown";
 import { TextSelection } from "@tiptap/pm/state";
 import { undo, redo } from "@tiptap/pm/history";
-import type { EditorView } from "@tiptap/pm/view";
-import { useRef, useState } from "react";
+import { EditorView } from "@tiptap/pm/view";
+import { useEffect, useRef, useState } from "react";
 import { cn, insertImageFile } from "@/lib/util";
 import { EditorProps } from "@/type/component";
 import { ScrollArea } from "@/component/ui/scroll-area";
@@ -36,6 +36,7 @@ export default function MarkdownEditor({
    initialMarkdown = "# Hello world",
    onChange,
    className,
+   ref,
 }: EditorProps) {
    const [mode, setMode] = useState<VimMode>("normal");
    const modeRef = useRef<VimMode>("normal");
@@ -317,28 +318,15 @@ export default function MarkdownEditor({
                clearPendingSoon(pendingGRef, false);
                return true;
             case "j":
-            case "k": {
+            case "k":
                event.preventDefault();
-               const moved = moveVertical(
-                  view,
-                  key === "j" ? 1 : -1,
-                  goalColumnRef.current,
+               sel?.modify(
+                  "extend",
+                  key === "j" ? "forward" : "backward",
+                  "line",
                );
-               if (moved && anchorPosRef.current !== null) {
-                  goalColumnRef.current = moved.x;
-                  dispatch(
-                     state.tr.setSelection(
-                        TextSelection.create(
-                           state.doc,
-                           anchorPosRef.current,
-                           moved.pos,
-                        ),
-                     ),
-                  );
-                  updateCursor(view);
-               }
+               updateCursor(view);
                return true;
-            }
             case "d":
             case "x":
             case "c": {
@@ -480,37 +468,17 @@ export default function MarkdownEditor({
             updateCursor(view);
             return true;
          }
-
-         case "j": {
+         case "j":
             event.preventDefault();
-            const moved = moveVertical(view, 1, goalColumnRef.current);
-            if (moved) {
-               goalColumnRef.current = moved.x;
-               dispatch(
-                  state.tr.setSelection(
-                     TextSelection.create(state.doc, moved.pos),
-                  ),
-               );
-               updateCursor(view);
-            }
+            sel?.modify("move", "forward", "line");
+            updateCursor(view);
             return true;
-         }
 
-         case "k": {
+         case "k":
             event.preventDefault();
-            const moved = moveVertical(view, -1, goalColumnRef.current);
-            if (moved) {
-               goalColumnRef.current = moved.x;
-               dispatch(
-                  state.tr.setSelection(
-                     TextSelection.create(state.doc, moved.pos),
-                  ),
-               );
-               updateCursor(view);
-            }
+            sel?.modify("move", "backward", "line");
+            updateCursor(view);
             return true;
-         }
-
          case "x": {
             event.preventDefault();
             goalColumnRef.current = null;
@@ -699,14 +667,24 @@ export default function MarkdownEditor({
       },
    });
 
+   useEffect(() => {
+      if (editor) {
+         addEventListener("resize", () => updateCursor(editor.view));
+
+         return () => {
+            removeEventListener("resize", () => updateCursor(editor.view));
+         };
+      }
+   }, [editor]);
+
    if (editor) {
       return (
          <ScrollArea className={cn("h-dvh", className)}>
             <div ref={wrapperRef} className="relative">
-               <EditorContent editor={editor} />
-               {cursorRect && (
+               <EditorContent ref={ref} editor={editor} />
+               {cursorRect && mode !== "visual" && (
                   <div
-                     className="absolute pointer-events-none animate-pulse duration-100 bg-foreground/50"
+                     className="absolute pointer-events-none animate-pulse duration-100 bg-foreground/30"
                      style={{
                         top: cursorRect.top,
                         left: cursorRect.left,
