@@ -29,6 +29,7 @@ import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import vesperTheme from "@/lib/vesperSyntaxTheme";
+import useEditorStore from "@/store/editor";
 
 const INSERT_CURSOR_WIDTH = 2;
 
@@ -38,7 +39,7 @@ export default function MarkdownEditor({
    className,
    ref,
 }: EditorProps) {
-   const [mode, setMode] = useState<VimMode>("normal");
+   const { mode, setMode } = useEditorStore();
    const modeRef = useRef<VimMode>("normal");
    const wrapperRef = useRef<HTMLDivElement>(null);
 

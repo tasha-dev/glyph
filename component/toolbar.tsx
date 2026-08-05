@@ -22,9 +22,16 @@ import Link from "next/link";
 import { ClassOnlyProps } from "@/type/component";
 import { useTheme } from "next-themes";
 import { Kbd } from "./ui/kbd";
+import useKeyboard from "@/hook/useKeyboard";
+import useEditorStore from "@/store/editor";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
    const { theme, setTheme } = useTheme();
+   const { mode } = useEditorStore();
+
+   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
+   useKeyboard("t", toggleTheme, false, mode === "normal");
 
    return (
       <DropdownMenu>
@@ -47,10 +54,7 @@ export default function Toolbar({ className }: ClassOnlyProps) {
                   <Kbd>o</Kbd>
                </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuItem
-               className="cursor-pointer"
-               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
+            <DropdownMenuItem className="cursor-pointer" onClick={toggleTheme}>
                <SunMoon />
                Change Theme
                <DropdownMenuShortcut className="ml-auto">
