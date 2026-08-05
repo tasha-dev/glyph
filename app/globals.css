@@ -131,10 +131,10 @@
    }
 
    .prose.prose-neutral pre {
-      @apply overflow-auto w-full h-auto !bg-foreground/25 border border-foreground/20 shadow-xs;
+      @apply overflow-auto w-full h-auto shadow-xs !bg-foreground/30 dark:!bg-neutral-800;
    }
 
    .prose.prose-neutral code {
-      @apply whitespace-pre selection:invert;
+      @apply whitespace-pre selection:!bg-neutral-100 selection:!text-neutral-900;
    }
 }

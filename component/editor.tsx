@@ -690,8 +690,6 @@ export default function MarkdownEditor({
                         left: cursorRect.left,
                         width: cursorRect.width,
                         height: cursorRect.height,
-                        mixBlendMode:
-                           mode === "insert" ? "normal" : "difference",
                      }}
                   />
                )}
