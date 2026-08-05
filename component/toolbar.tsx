@@ -25,8 +25,11 @@ import { Kbd } from "./ui/kbd";
 import useKeyboard from "@/hook/useKeyboard";
 import useEditorStore from "@/store/editor";
 import useSideBarStore from "@/store/sidebar";
+import { useState } from "react";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
+   const [open, setOpen] = useState<boolean>(false);
+
    const { theme, setTheme } = useTheme();
    const { mode } = useEditorStore();
    const { toggle } = useSideBarStore();
@@ -35,9 +38,10 @@ export default function Toolbar({ className }: ClassOnlyProps) {
 
    useKeyboard("t", toggleTheme, false, mode === "normal");
    useKeyboard("s", () => toggle(), false, mode === "normal");
+   useKeyboard("/", () => setOpen(!open), false, mode === "normal");
 
    return (
-      <DropdownMenu>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
          <DropdownMenuTrigger
             render={
                <Button

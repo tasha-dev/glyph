@@ -24,6 +24,13 @@ export default function SideBar({ className }: ClassOnlyProps) {
       editorStore.mode === "disabled" && open,
    );
 
+   useKeyboard(
+      "escape",
+      () => toggle(),
+      false,
+      editorStore.mode === "disabled" && open,
+   );
+
    return (
       <AnimatePresence key="sidebar">
          {open && (

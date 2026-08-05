@@ -44,7 +44,7 @@ export default function HomePage() {
                />
             ) : (
                <ScrollArea className={"h-dvh overflow-auto p-4"}>
-                  <div className="min-h-dvh flex items-center justify-center max-w-2xl mx-auto">
+                  <div className="min-h-dvh flex items-center justify-center  max-w-2xl mx-auto">
                      <Empty className="p-0 m-0 rounded-0">
                         <EmptyHeader>
                            <EmptyMedia variant="icon">
