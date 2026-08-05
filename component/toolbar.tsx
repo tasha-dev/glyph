@@ -24,14 +24,17 @@ import { useTheme } from "next-themes";
 import { Kbd } from "./ui/kbd";
 import useKeyboard from "@/hook/useKeyboard";
 import useEditorStore from "@/store/editor";
+import useSideBarStore from "@/store/sidebar";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
    const { theme, setTheme } = useTheme();
    const { mode } = useEditorStore();
+   const { toggle } = useSideBarStore();
 
    const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
    useKeyboard("t", toggleTheme, false, mode === "normal");
+   useKeyboard("s", () => toggle(), false, mode === "normal");
 
    return (
       <DropdownMenu>
@@ -47,11 +50,11 @@ export default function Toolbar({ className }: ClassOnlyProps) {
             }
          />
          <DropdownMenuContent className={"w-auto"} sideOffset={10}>
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem className="cursor-pointer" onClick={toggle}>
                <PanelLeft />
                Toggle side bar
                <DropdownMenuShortcut className="ml-auto">
-                  <Kbd>o</Kbd>
+                  <Kbd>s</Kbd>
                </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer" onClick={toggleTheme}>

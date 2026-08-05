@@ -114,7 +114,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
          className={cn(inter.className, vazir.className)}
       >
          <ThemeProvider>
-            <body>
+            <body className="overflow-hidden h-dvh w-dvw">
                <TooltipProvider>{children}</TooltipProvider>
             </body>
          </ThemeProvider>

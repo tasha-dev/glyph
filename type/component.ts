@@ -11,4 +11,5 @@ export interface EditorProps {
    initialMarkdown?: string;
    onChange?: (markdown: string) => void;
    ref?: React.RefObject<HTMLDivElement | null>;
+   disabled?: boolean;
 }

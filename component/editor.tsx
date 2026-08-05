@@ -38,6 +38,7 @@ export default function MarkdownEditor({
    onChange,
    className,
    ref,
+   disabled = false,
 }: EditorProps) {
    const { mode, setMode } = useEditorStore();
    const modeRef = useRef<VimMode>("normal");
@@ -682,8 +683,14 @@ export default function MarkdownEditor({
       return (
          <ScrollArea className={cn("h-dvh", className)}>
             <div ref={wrapperRef} className="relative">
-               <EditorContent ref={ref} editor={editor} />
-               {cursorRect && mode !== "visual" && (
+               <EditorContent
+                  ref={ref}
+                  editor={editor}
+                  tabIndex={disabled ? -1 : 0}
+                  disabled={disabled}
+                  className="disabled:opacity-50 disabled:pointer-events-none outline-none"
+               />
+               {cursorRect && mode !== "visual" && !disabled && (
                   <div
                      className="absolute pointer-events-none animate-pulse duration-100 bg-foreground/30"
                      style={{
