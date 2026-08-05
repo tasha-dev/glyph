@@ -129,4 +129,12 @@
    button {
       @apply cursor-pointer;
    }
+
+   .prose.prose-neutral pre {
+      @apply overflow-auto w-full h-auto !bg-foreground/25 border border-foreground/20 shadow-xs;
+   }
+
+   .prose.prose-neutral code {
+      @apply whitespace-pre selection:invert;
+   }
 }

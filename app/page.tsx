@@ -9,7 +9,7 @@ export default function HomePage() {
 
    return (
       <section className="relative z-0">
-         <Toolbar className="fixed top-4 right-4 z-10" />
+         <Toolbar className="fixed top-2 right-2 z-10" />
          <main onClick={() => editorRef.current?.focus()}>
             <Editor ref={editorRef} />
          </main>

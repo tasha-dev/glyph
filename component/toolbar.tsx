@@ -1,17 +1,27 @@
 "use client";
 
-import { Code2, List, SunMoon } from "lucide-react";
+import {
+   Code2,
+   File,
+   FileText,
+   Heading,
+   List,
+   PanelLeft,
+   SunMoon,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuItem,
    DropdownMenuSeparator,
+   DropdownMenuShortcut,
    DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
 import { ClassOnlyProps } from "@/type/component";
 import { useTheme } from "next-themes";
+import { Kbd } from "./ui/kbd";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
    const { theme, setTheme } = useTheme();
@@ -20,18 +30,41 @@ export default function Toolbar({ className }: ClassOnlyProps) {
       <DropdownMenu>
          <DropdownMenuTrigger
             render={
-               <Button size="icon-lg" variant={"blur"} className={className}>
+               <Button
+                  size="icon-lg"
+                  variant={"secondary"}
+                  className={className}
+               >
                   <List />
                </Button>
             }
          />
-         <DropdownMenuContent className={"w-[150px]"} sideOffset={10}>
+         <DropdownMenuContent className={"w-auto"} sideOffset={10}>
+            <DropdownMenuItem className="cursor-pointer">
+               <PanelLeft />
+               Toggle side bar
+               <DropdownMenuShortcut className="ml-auto">
+                  <Kbd>o</Kbd>
+               </DropdownMenuShortcut>
+            </DropdownMenuItem>
             <DropdownMenuItem
-               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                className="cursor-pointer"
+               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
                <SunMoon />
                Change Theme
+               <DropdownMenuShortcut className="ml-auto">
+                  <Kbd>t</Kbd>
+               </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer">
+               <FileText />
+               Export To PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+               <Heading />
+               Export To .md
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
