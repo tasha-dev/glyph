@@ -10,7 +10,7 @@ import useEditorStore from "@/store/editor";
 import useSideBarStore from "@/store/sidebar";
 
 export default function NoteItem({ className, data }: NoteItemProps) {
-   const { setActiveNoteId } = useEditorStore();
+   const { setActiveNoteId, setMode } = useEditorStore();
    const { toggle } = useSideBarStore();
 
    return (
@@ -47,6 +47,7 @@ export default function NoteItem({ className, data }: NoteItemProps) {
                onClick={() => {
                   setActiveNoteId(data.id);
                   toggle();
+                  setMode("insert");
                }}
             >
                <Eye />
