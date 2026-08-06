@@ -5,6 +5,7 @@ import { Inter, Vazirmatn } from "next/font/google";
 import { cn } from "@/lib/util";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/component/ui/tooltip";
+import { Toaster } from "@/component/ui/sonner";
 
 const APP_NAME = "Glyph";
 const APP_DESCRIPTION =
@@ -115,6 +116,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
          <ThemeProvider>
             <body className="overflow-hidden h-dvh w-dvw">
+               <Toaster position="bottom-center" />
                <TooltipProvider>{children}</TooltipProvider>
             </body>
          </ThemeProvider>

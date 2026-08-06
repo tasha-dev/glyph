@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { EditorStoreType } from "../type/store";
 
 const useEditorStore = create<EditorStoreType>((set) => ({
-   mode: "normal",
+   mode: "disabled",
    disabled: false,
    setDisabled: (disabled) => {
       set({

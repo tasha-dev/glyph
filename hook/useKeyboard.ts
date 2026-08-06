@@ -10,16 +10,20 @@ export default function useKeyboard(
 ) {
    useEffect(() => {
       function eventHandlerFn(e: KeyboardEvent) {
-         if (condition) {
-            if (ctrl) {
-               if (e.key.toLowerCase() === key.toLowerCase() && e.ctrlKey) {
-                  e.preventDefault();
-                  handler();
-               }
-            } else {
-               if (e.key.toLowerCase() === key.toLowerCase()) {
-                  e.preventDefault();
-                  handler();
+         const activeElement = document.activeElement;
+
+         if (activeElement && activeElement.tagName.toLowerCase() !== "input") {
+            if (condition) {
+               if (ctrl) {
+                  if (e.key.toLowerCase() === key.toLowerCase() && e.ctrlKey) {
+                     e.preventDefault();
+                     handler();
+                  }
+               } else {
+                  if (e.key.toLowerCase() === key.toLowerCase()) {
+                     e.preventDefault();
+                     handler();
+                  }
                }
             }
          }
