@@ -51,7 +51,7 @@ export default function EditNote({
       <Popover open={open} onOpenChange={setOpen}>
          <PopoverTrigger
             render={
-               <Button size={"icon"}>
+               <Button size={"icon"} className={className}>
                   <Pen />
                </Button>
             }

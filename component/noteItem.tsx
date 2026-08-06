@@ -1,8 +1,8 @@
 "use client";
 
 import { NoteItemProps } from "@/type/component";
-import { Button } from "./ui/button";
-import { Notebook } from "lucide-react";
+import { Button, buttonVariants } from "./ui/button";
+import { Eye, Notebook } from "lucide-react";
 import { cn, daysAgo } from "@/lib/util";
 import EditNote from "./popover/editNote";
 import DeleteNote from "./popover/deleteNote";
@@ -14,13 +14,11 @@ export default function NoteItem({ className, data }: NoteItemProps) {
    const { toggle } = useSideBarStore();
 
    return (
-      <Button
-         variant="secondary"
-         onClick={() => {
-            setActiveNoteId(data.id);
-            toggle();
-         }}
+      <div
          className={cn(
+            buttonVariants({
+               variant: "secondary",
+            }),
             "flex items-center h-auto py-1.5 justify-between cursor-pointer",
             className,
          )}
@@ -44,8 +42,17 @@ export default function NoteItem({ className, data }: NoteItemProps) {
          </div>
          <div className="shrink-0 flex items-center justify-end gap-2">
             <EditNote data={data} />
+            <Button
+               variant="outline"
+               onClick={() => {
+                  setActiveNoteId(data.id);
+                  toggle();
+               }}
+            >
+               <Eye />
+            </Button>
             <DeleteNote data={data} />
          </div>
-      </Button>
+      </div>
    );
 }
