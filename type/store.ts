@@ -4,9 +4,10 @@ import { VimMode } from "./editor";
 export interface EditorStoreType {
    mode: VimMode;
    disabled: boolean;
+   activeNoteId?: string;
    setMode: (mode: VimMode) => void;
    setDisabled: (disabled: boolean) => void;
-   activeNoteId?: string;
+   setActiveNoteId: (id: string) => void;
 }
 
 export interface SideBarStoreType {

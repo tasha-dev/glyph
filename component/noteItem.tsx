@@ -1,23 +1,29 @@
 "use client";
 
 import { NoteItemProps } from "@/type/component";
-import { Button, buttonVariants } from "./ui/button";
-import { Notebook, Trash } from "lucide-react";
+import { Button } from "./ui/button";
+import { Notebook } from "lucide-react";
 import { cn, daysAgo } from "@/lib/util";
 import EditNote from "./popover/editNote";
 import DeleteNote from "./popover/deleteNote";
+import useEditorStore from "@/store/editor";
+import useSideBarStore from "@/store/sidebar";
 
 export default function NoteItem({ className, data }: NoteItemProps) {
+   const { setActiveNoteId } = useEditorStore();
+   const { toggle } = useSideBarStore();
+
    return (
-      <div
-         className={buttonVariants({
-            size: "default",
-            variant: "secondary",
-            className: cn(
-               "flex items-center h-auto py-1.5 justify-between cursor-pointer",
-               className,
-            ),
-         })}
+      <Button
+         variant="secondary"
+         onClick={() => {
+            setActiveNoteId(data.id);
+            toggle();
+         }}
+         className={cn(
+            "flex items-center h-auto py-1.5 justify-between cursor-pointer",
+            className,
+         )}
       >
          <div className="flex-1 flex items-center justify-start gap-2 overflow-hidden">
             <div
@@ -28,10 +34,10 @@ export default function NoteItem({ className, data }: NoteItemProps) {
                <Notebook className="shrink-0 size-4.5" />
             </div>
             <div className="flex-1 overflow-hidden">
-               <span className="block text-sm truncate w-full">
+               <span className="block text-sm truncate w-full text-left">
                   {data.title}
                </span>
-               <span className="text-muted-foreground text-xs w-full truncate">
+               <span className="text-muted-foreground text-xs w-full truncate text-left block">
                   {daysAgo(data.createdAt)}
                </span>
             </div>
@@ -40,6 +46,6 @@ export default function NoteItem({ className, data }: NoteItemProps) {
             <EditNote data={data} />
             <DeleteNote data={data} />
          </div>
-      </div>
+      </Button>
    );
 }
