@@ -9,12 +9,18 @@ import {
 } from "@/component/ui/empty";
 import { ScrollArea } from "@/component/ui/scroll-area";
 import { FileQuestion } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 
-export default function NotFound() {
+export const metadata: Metadata = {
+   title: "Not Found",
+   description: "Page not found",
+};
+
+export default function NotFoundPage() {
    return (
       <ScrollArea className={"h-dvh"}>
-         <div className="min-h-dvh flex items-center justify-center">
+         <div className="min-h-dvh p-4 flex items-center justify-center">
             <Empty className={"p-0 m-0"}>
                <EmptyHeader>
                   <EmptyMedia variant={"icon"}>
@@ -27,6 +33,13 @@ export default function NotFound() {
                   </EmptyDescription>
                </EmptyHeader>
                <EmptyContent>
+                  <Button
+                     onClick={() => {
+                        throw new Error("HI");
+                     }}
+                  >
+                     CLICK
+                  </Button>
                   <Button render={<Link href={"/"}>Go back home</Link>} />
                </EmptyContent>
             </Empty>

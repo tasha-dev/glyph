@@ -13,3 +13,10 @@ export interface EditorProps {
    ref?: React.RefObject<HTMLDivElement | null>;
    disabled?: boolean;
 }
+
+export interface ErrorPageProps {
+   reset: () => void;
+   error: Error & {
+      digest?: string;
+   };
+}
