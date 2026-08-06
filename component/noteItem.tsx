@@ -5,6 +5,7 @@ import { Button, buttonVariants } from "./ui/button";
 import { Notebook, Trash } from "lucide-react";
 import { cn, daysAgo } from "@/lib/util";
 import EditNote from "./popover/editNote";
+import DeleteNote from "./popover/deleteNote";
 
 export default function NoteItem({ className, data }: NoteItemProps) {
    return (
@@ -37,9 +38,7 @@ export default function NoteItem({ className, data }: NoteItemProps) {
          </div>
          <div className="shrink-0 flex items-center justify-end gap-2">
             <EditNote data={data} />
-            <Button size={"icon"} variant={"destructive"}>
-               <Trash />
-            </Button>
+            <DeleteNote data={data} />
          </div>
       </div>
    );
