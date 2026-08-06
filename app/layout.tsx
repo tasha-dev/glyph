@@ -11,7 +11,7 @@ const APP_DESCRIPTION =
    "Glyph is a fast, local-first Markdown editor built for developers. Featuring optional Vim keybindings, offline support, and a distraction-free interface, it lets you capture ideas instantly without accounts, cloud lock-in, or unnecessary complexity.";
 
 export const metadata: Metadata = {
-   // metadataBase: new URL("https://glyph-app.vercel.app"),
+   metadataBase: new URL("https://glyph-sigma.vercel.app/"),
    title: {
       default: APP_NAME,
       template: `%s • ${APP_NAME}`,
