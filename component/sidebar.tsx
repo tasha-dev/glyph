@@ -9,14 +9,13 @@ import useEditorStore from "@/store/editor";
 import useKeyboard from "@/hook/useKeyboard";
 import useNotesStore from "@/store/notes";
 import { ScrollArea } from "./ui/scroll-area";
-import { Button } from "./ui/button";
-import { PlusIcon } from "lucide-react";
 import AddNote from "./popover/addNote";
+import NoteItem from "./noteItem";
 
 export default function SideBar({ className }: ClassOnlyProps) {
    const { open, toggle } = useSideBarStore();
    const editorStore = useEditorStore();
-   const { notes, addNote } = useNotesStore();
+   const { notes } = useNotesStore();
 
    useEffect(() => {
       if (!open) editorStore.setDisabled(false);
@@ -84,7 +83,8 @@ export default function SideBar({ className }: ClassOnlyProps) {
                      mass: 0.8,
                   }}
                   className={cn(
-                     "fixed left-0 bg-card border-r border-foreground/10 shadow-lg shadow-black/20 rounded-r-2xl w-1/3 top-0 h-dvh overflow-hidden text-foreground",
+                     "fixed left-0 bg-card border-r border-foreground/10 shadow-lg shadow-black/20 rounded-r-2xl top-0 h-dvh overflow-hidden text-foreground",
+                     "lg:w-1/3 w-3/4",
                      className,
                   )}
                >
@@ -94,6 +94,11 @@ export default function SideBar({ className }: ClassOnlyProps) {
                            Your notes
                         </span>
                         <AddNote />
+                     </div>
+                     <div className="p-4 flex flex-col gap-3">
+                        {notes.map((item, index) => (
+                           <NoteItem key={index} data={item} />
+                        ))}
                      </div>
                   </ScrollArea>
                </motion.nav>

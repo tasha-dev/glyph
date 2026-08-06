@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { formatDistance } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import type { EditorView } from "@tiptap/pm/view";
 
@@ -85,3 +86,8 @@ export function insertImageFile(view: EditorView, file: File, pos?: number) {
    reader.readAsDataURL(file);
    return true;
 }
+
+export const daysAgo = (isoDate: string) =>
+   formatDistance(isoDate, new Date(), {
+      addSuffix: true,
+   });

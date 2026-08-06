@@ -1,8 +1,8 @@
 "use client";
 
-import { ClassOnlyProps } from "@/type/component";
+import { EditNoteProps } from "@/type/component";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Pen } from "lucide-react";
 import {
    Popover,
    PopoverContent,
@@ -23,19 +23,25 @@ import useNotesStore from "@/store/notes";
 import { toast } from "sonner";
 import { useState } from "react";
 
-export default function AddNote({ className }: ClassOnlyProps) {
-   const { addNote } = useNotesStore();
+export default function EditNote({
+   className,
+   data: { id, title, content },
+}: EditNoteProps) {
+   const { updateNote } = useNotesStore();
    const [open, setOpen] = useState(false);
    const form = useForm<createNewNoteFormType>({
       resolver: zodResolver(createNewNoteFormSchema),
+      defaultValues: {
+         title,
+      },
    });
 
    const onSubmit: SubmitHandler<createNewNoteFormType> = (data) => {
       try {
-         addNote(data.title);
-         toast.success("The note is added successfully.");
+         updateNote(id, data.title, content);
+         toast.success("The note is edited successfully.");
       } catch {
-         toast.error("There was an error while adding the note.");
+         toast.error("There was an error while editing the note.");
       } finally {
          setOpen(false);
       }
@@ -45,17 +51,17 @@ export default function AddNote({ className }: ClassOnlyProps) {
       <Popover open={open} onOpenChange={setOpen}>
          <PopoverTrigger
             render={
-               <Button size="icon" className={className}>
-                  <Plus />
+               <Button size={"icon"}>
+                  <Pen />
                </Button>
             }
          />
          <PopoverContent sideOffset={10}>
             <PopoverHeader>
-               <PopoverTitle>Create New Note</PopoverTitle>
+               <PopoverTitle>Edit Note</PopoverTitle>
                <PopoverDescription>
-                  Start a fresh note to capture ideas, tasks, or thoughts. Add a
-                  title and save it to your collection.
+                  Edit a note to capture new ideas, tasks, or thoughts. Add a
+                  title and edit the note in your collection.
                </PopoverDescription>
             </PopoverHeader>
             <form
@@ -82,7 +88,7 @@ export default function AddNote({ className }: ClassOnlyProps) {
                   )}
                />
                <Button size="icon" className={"shrink-0"} type="submit">
-                  <Plus />
+                  <Pen />
                </Button>
             </form>
             {form.formState.errors.title && (

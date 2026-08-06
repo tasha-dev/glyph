@@ -1,3 +1,5 @@
+import { Note } from "@/store/general";
+
 export interface RootLayoutProps {
    children: React.ReactNode;
 }
@@ -19,4 +21,14 @@ export interface ErrorPageProps {
    error: Error & {
       digest?: string;
    };
+}
+
+export interface NoteItemProps {
+   className?: string;
+   data: Note;
+}
+
+export interface EditNoteProps {
+   className?: string;
+   data: Note;
 }

@@ -1,3 +1,4 @@
+import { Note } from "@/store/general";
 import { VimMode } from "./editor";
 
 export interface EditorStoreType {
@@ -14,12 +15,7 @@ export interface SideBarStoreType {
 }
 
 export interface NotesStoreType {
-   notes: {
-      id: string;
-      title: string;
-      content: string;
-      createdAt: string; // ISO
-   }[];
+   notes: Note[];
    addNote: (title: string) => void;
    removeNote: (id: string) => void;
    updateNote: (id: string, title: string, content: string) => void;
