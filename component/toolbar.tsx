@@ -26,15 +26,19 @@ import useKeyboard from "@/hook/useKeyboard";
 import useEditorStore from "@/store/editor";
 import useSideBarStore from "@/store/sidebar";
 import { useState } from "react";
+import { exportMarkdown } from "@/lib/file";
+import useNotesStore from "@/store/notes";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
    const [open, setOpen] = useState<boolean>(false);
 
    const { theme, setTheme } = useTheme();
-   const { mode } = useEditorStore();
+   const { notes } = useNotesStore();
+   const { mode, activeNoteId } = useEditorStore();
    const { toggle } = useSideBarStore();
 
    const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+   const activeNote = activeNoteId && notes.find((item) => item.id);
 
    useKeyboard("t", toggleTheme, false, mode === "normal");
    useKeyboard("s", () => toggle(), false, mode === "normal");
@@ -69,11 +73,26 @@ export default function Toolbar({ className }: ClassOnlyProps) {
                </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem
+               className="cursor-pointer"
+               disabled={!activeNote || !activeNoteId}
+               onClick={() => {
+                  if (!!activeNoteId && !!activeNote) {
+                  }
+               }}
+            >
                <FileText />
                Export To PDF
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem
+               className="cursor-pointer"
+               disabled={!activeNote || !activeNoteId}
+               onClick={() => {
+                  if (!!activeNoteId && !!activeNote) {
+                     exportMarkdown(activeNote.title, activeNote.content);
+                  }
+               }}
+            >
                <Heading />
                Export To .md
             </DropdownMenuItem>
