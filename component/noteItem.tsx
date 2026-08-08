@@ -44,6 +44,7 @@ export default function NoteItem({ className, data }: NoteItemProps) {
             <EditNote data={data} />
             <Button
                variant="outline"
+               size="icon"
                onClick={() => {
                   setActiveNoteId(data.id);
                   toggle();

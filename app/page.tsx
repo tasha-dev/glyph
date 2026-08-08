@@ -38,7 +38,7 @@ export default function HomePage() {
             </section>
          )}
          <section className="relative z-0 print:hidden">
-            <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/20" />
+            <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
             <SideBar className="z-30" />
             <main onClick={() => editorRef.current?.focus()}>
                {activeNote && activeNoteId ? (
@@ -47,7 +47,8 @@ export default function HomePage() {
                         <div
                            className={buttonVariants({
                               size: "default",
-                              variant: "outline",
+                              variant: "secondary",
+                              className: "shadow-lg shadow-black/10",
                            })}
                         >
                            {activeNote.title}.md
@@ -55,10 +56,10 @@ export default function HomePage() {
                         {mode !== "disabled" && (
                            <div
                               className={buttonVariants({
-                                 variant: "outline",
+                                 variant: "secondary",
                                  size: "default",
                                  className: cn(
-                                    "border-dashed !border-current transition-colors duration-300",
+                                    "border-dashed !border-current transition-colors duration-300 shadow-lg shadow-black/10",
                                     mode === "normal"
                                        ? "text-sky-500"
                                        : mode === "insert"
