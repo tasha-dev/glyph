@@ -32,3 +32,8 @@ export interface EditNoteProps {
    className?: string;
    data: Note;
 }
+
+export interface MarkdownRenderProps {
+   children: string;
+   className?: string;
+}

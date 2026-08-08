@@ -78,6 +78,7 @@ export default function Toolbar({ className }: ClassOnlyProps) {
                disabled={!activeNote || !activeNoteId}
                onClick={() => {
                   if (!!activeNoteId && !!activeNote) {
+                     window.print();
                   }
                }}
             >

@@ -27,7 +27,7 @@ export default function EditNote({
    className,
    data: { id, title, content },
 }: EditNoteProps) {
-   const { updateNote } = useNotesStore();
+   const { updateNote, notes } = useNotesStore();
    const [open, setOpen] = useState(false);
    const form = useForm<createNewNoteFormType>({
       resolver: zodResolver(createNewNoteFormSchema),
@@ -38,8 +38,14 @@ export default function EditNote({
 
    const onSubmit: SubmitHandler<createNewNoteFormType> = (data) => {
       try {
-         updateNote(id, data.title, content);
-         toast.success("The note is edited successfully.");
+         const foundedItem = notes.find((item) => item.title === data.title);
+
+         if (!foundedItem) {
+            updateNote(id, data.title, content);
+            toast.success("The note is edited successfully.");
+         } else {
+            toast.error("The note already exists. Try another name for it.");
+         }
       } catch {
          toast.error("There was an error while editing the note.");
       } finally {
