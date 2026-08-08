@@ -33,13 +33,6 @@ export default function NotFoundPage() {
                   </EmptyDescription>
                </EmptyHeader>
                <EmptyContent>
-                  <Button
-                     onClick={() => {
-                        throw new Error("HI");
-                     }}
-                  >
-                     CLICK
-                  </Button>
                   <Button render={<Link href={"/"}>Go back home</Link>} />
                </EmptyContent>
             </Empty>
