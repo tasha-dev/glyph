@@ -26,7 +26,7 @@ import useKeyboard from "@/hook/useKeyboard";
 import useEditorStore from "@/store/editor";
 import useSideBarStore from "@/store/sidebar";
 import { useState } from "react";
-import { exportMarkdown } from "@/lib/file";
+import { exportMarkdown, printWithDelay } from "@/lib/file";
 import useNotesStore from "@/store/notes";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
@@ -78,7 +78,7 @@ export default function Toolbar({ className }: ClassOnlyProps) {
                disabled={!activeNote || !activeNoteId}
                onClick={() => {
                   if (!!activeNoteId && !!activeNote) {
-                     window.print();
+                     printWithDelay();
                   }
                }}
             >

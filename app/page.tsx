@@ -21,6 +21,7 @@ import useSideBarStore from "@/store/sidebar";
 import { ScrollArea } from "@/component/ui/scroll-area";
 import { cn } from "@/lib/util";
 import MarkdownRenderer from "@/component/markdownRenderer";
+import CommandMenu from "@/component/command";
 
 export default function HomePage() {
    const editorRef = useRef<HTMLDivElement | null>(null);
@@ -32,6 +33,7 @@ export default function HomePage() {
 
    return (
       <>
+         <CommandMenu />
          {activeNote && (
             <section className="hidden print:block">
                <MarkdownRenderer>{activeNote.content}</MarkdownRenderer>

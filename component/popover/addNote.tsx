@@ -44,6 +44,10 @@ export default function AddNote({ className }: ClassOnlyProps) {
          toast.error("There was an error while adding the note.");
       } finally {
          setOpen(false);
+
+         form.reset({
+            title: "",
+         });
       }
    };
 

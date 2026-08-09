@@ -76,7 +76,7 @@ export function insertImageFile(view: EditorView, file: File, pos?: number) {
 
    const reader = new FileReader();
    reader.onload = () => {
-      const src = reader.result as string; // data:image/png;base64,...
+      const src = reader.result as string;
       const { schema } = view.state;
       const node = schema.nodes.image.create({ src });
       const insertPos = pos ?? view.state.selection.from;
