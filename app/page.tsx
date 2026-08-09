@@ -28,11 +28,11 @@ export default function HomePage() {
    const { notes, updateNote } = useNotesStore();
    const { toggle } = useSideBarStore();
 
-   const activeNote = activeNoteId && notes.find((item) => item.id);
+   const activeNote = notes.find((item) => item.id === activeNoteId);
 
    return (
       <>
-         {activeNote && activeNoteId && (
+         {activeNote && (
             <section className="hidden print:block">
                <MarkdownRenderer>{activeNote.content}</MarkdownRenderer>
             </section>
@@ -41,7 +41,7 @@ export default function HomePage() {
             <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
             <SideBar className="z-30" />
             <main onClick={() => editorRef.current?.focus()}>
-               {activeNote && activeNoteId ? (
+               {activeNote ? (
                   <>
                      <div className="flex items-center justif-between gap-2 z-10 fixed bottom-2 right-2 flex-wrap">
                         <div
@@ -55,16 +55,15 @@ export default function HomePage() {
                         </div>
                         {mode !== "disabled" && (
                            <div
+                              data-mode={mode}
                               className={buttonVariants({
                                  variant: "secondary",
                                  size: "default",
                                  className: cn(
                                     "border-dashed !border-current transition-colors duration-300 shadow-lg shadow-black/10",
-                                    mode === "normal"
-                                       ? "text-sky-500"
-                                       : mode === "insert"
-                                         ? "text-rose-500"
-                                         : "text-amber-500",
+                                    "data-[mode=normal]:text-sky-500",
+                                    "data-[mode=insert]:text-rose-500",
+                                    "data-[mode=visual]:text-amber-500",
                                  ),
                               })}
                            >
@@ -72,14 +71,20 @@ export default function HomePage() {
                            </div>
                         )}
                      </div>
-                     <Editor
-                        initialMarkdown={activeNote.content}
-                        disabled={disabled}
-                        ref={editorRef}
-                        onChange={(content) => {
-                           updateNote(activeNoteId, activeNote.title, content);
-                        }}
-                     />
+                     {notes.map(
+                        (item, index) =>
+                           item.id === activeNoteId && (
+                              <Editor
+                                 key={index}
+                                 initialMarkdown={item.content}
+                                 disabled={disabled}
+                                 ref={editorRef}
+                                 onChange={(content) => {
+                                    updateNote(item.id, item.title, content);
+                                 }}
+                              />
+                           ),
+                     )}
                   </>
                ) : (
                   <ScrollArea className={"h-dvh overflow-auto p-4"}>
