@@ -25,7 +25,7 @@ import CommandMenu from "@/component/command";
 
 export default function HomePage() {
    const editorRef = useRef<HTMLDivElement | null>(null);
-   const { disabled, activeNoteId, mode } = useEditorStore();
+   const { disabled, activeNoteId, mode, setMode } = useEditorStore();
    const { notes, updateNote } = useNotesStore();
    const { toggle } = useSideBarStore();
 
@@ -42,7 +42,14 @@ export default function HomePage() {
          <section className="relative z-0 print:hidden">
             <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
             <SideBar className="z-30" />
-            <main onClick={() => editorRef.current?.focus()}>
+            <main
+               onClick={() => {
+                  if (activeNote) {
+                     editorRef.current?.focus();
+                     setMode("insert");
+                  }
+               }}
+            >
                {activeNote ? (
                   <>
                      <div className="flex items-center justif-between gap-2 z-10 fixed bottom-2 right-2 flex-wrap">
