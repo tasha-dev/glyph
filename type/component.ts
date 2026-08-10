@@ -37,3 +37,7 @@ export interface MarkdownRenderProps {
    children: string;
    className?: string;
 }
+
+export interface DesktopGuardProps {
+   children: React.ReactNode;
+}

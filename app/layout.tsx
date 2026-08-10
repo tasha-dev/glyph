@@ -6,6 +6,7 @@ import { cn } from "@/lib/util";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/component/ui/tooltip";
 import { Toaster } from "@/component/ui/sonner";
+import DesktopGuard from "@/component/desktopGuard";
 
 const APP_NAME = "Glyph";
 const APP_DESCRIPTION =
@@ -116,8 +117,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
          <ThemeProvider>
             <body className="overflow-hidden h-dvh w-dvw">
-               <Toaster position="bottom-center" />
-               <TooltipProvider>{children}</TooltipProvider>
+               <DesktopGuard>
+                  <Toaster position="bottom-center" />
+                  <TooltipProvider>{children}</TooltipProvider>
+               </DesktopGuard>
             </body>
          </ThemeProvider>
       </html>
