@@ -30,6 +30,7 @@ export default function DeleteNote({
                   size="icon"
                   className={className}
                   variant={"destructive"}
+                  data-vim-item
                >
                   <Trash />
                </Button>

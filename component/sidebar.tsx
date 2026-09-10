@@ -12,6 +12,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import AddNote from "./popover/addNote";
 import NoteItem from "./noteItem";
 import useDisableTabExcept from "@/hook/useDisableTabExpect";
+import useVimNavigation from "@/hook/useVimNavigation";
 
 export default function SideBar({ className }: ClassOnlyProps) {
    const { open, toggle } = useSideBarStore();
@@ -21,6 +22,10 @@ export default function SideBar({ className }: ClassOnlyProps) {
    const sideBarRef = useRef<HTMLDivElement>(null);
 
    useDisableTabExcept(sideBarRef, open);
+   useVimNavigation(sideBarRef, {
+      disabled: !open,
+      onSelect: (_, item) => item.click(),
+   });
 
    useEffect(() => {
       if (!open) editorStore.setDisabled(false);

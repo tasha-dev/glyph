@@ -57,7 +57,7 @@ export default function EditNote({
       <Popover open={open} onOpenChange={setOpen}>
          <PopoverTrigger
             render={
-               <Button size={"icon"} className={className}>
+               <Button size={"icon"} className={className} data-vim-item>
                   <Pen />
                </Button>
             }
