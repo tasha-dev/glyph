@@ -26,7 +26,7 @@ import DesktopGuard from "@/component/desktopGuard";
 
 export default function HomePage() {
    const editorRef = useRef<HTMLDivElement | null>(null);
-   const { disabled, activeNoteId, mode, setMode } = useEditorStore();
+   const { disabled, activeNoteId, mode } = useEditorStore();
    const { notes, updateNote } = useNotesStore();
    const { toggle } = useSideBarStore();
 
@@ -44,10 +44,9 @@ export default function HomePage() {
             <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
             <SideBar className="z-30" />
             <main
-               onClick={() => {
+               onClick={(e) => {
                   if (activeNote) {
-                     editorRef.current?.focus();
-                     setMode("insert");
+                     e.preventDefault();
                   }
                }}
             >
