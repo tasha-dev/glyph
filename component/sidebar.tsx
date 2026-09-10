@@ -4,18 +4,23 @@ import useSideBarStore from "@/store/sidebar";
 import { ClassOnlyProps } from "@/type/component";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/util";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useEditorStore from "@/store/editor";
 import useKeyboard from "@/hook/useKeyboard";
 import useNotesStore from "@/store/notes";
 import { ScrollArea } from "./ui/scroll-area";
 import AddNote from "./popover/addNote";
 import NoteItem from "./noteItem";
+import useDisableTabExcept from "@/hook/useDisableTabExpect";
 
 export default function SideBar({ className }: ClassOnlyProps) {
    const { open, toggle } = useSideBarStore();
    const editorStore = useEditorStore();
    const { notes } = useNotesStore();
+
+   const sideBarRef = useRef<HTMLDivElement>(null);
+
+   useDisableTabExcept(sideBarRef, open);
 
    useEffect(() => {
       if (!open) editorStore.setDisabled(false);
@@ -43,6 +48,7 @@ export default function SideBar({ className }: ClassOnlyProps) {
                <motion.div
                   onClick={() => toggle()}
                   className="fixed inset-0 z-20 backdrop-blur-3xl bg-card/10"
+                  tabIndex={0}
                   initial={{
                      opacity: 0,
                   }}
@@ -61,6 +67,7 @@ export default function SideBar({ className }: ClassOnlyProps) {
                   }}
                />
                <motion.nav
+                  ref={sideBarRef}
                   initial={{
                      x: -40,
                      opacity: 0,
