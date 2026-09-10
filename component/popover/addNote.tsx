@@ -91,7 +91,13 @@ export default function AddNote({ className }: ClassOnlyProps) {
                      </Field>
                   )}
                />
-               <Button size="icon" className={"shrink-0"} type="submit">
+               <Button
+                  size="icon"
+                  className={"shrink-0"}
+                  type="submit"
+                  data-vim-item
+                  autoFocus
+               >
                   <Plus />
                </Button>
             </form>

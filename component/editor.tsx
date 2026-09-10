@@ -32,6 +32,45 @@ import vesperTheme from "@/lib/vesperSyntaxTheme";
 import useEditorStore from "@/store/editor";
 
 const INSERT_CURSOR_WIDTH = 2;
+const SCROLL_MARGIN = 32;
+
+function getScrollableAncestor(el: HTMLElement | null): HTMLElement | null {
+   let node: HTMLElement | null = el;
+   while (node) {
+      if (node.hasAttribute("data-radix-scroll-area-viewport")) return node;
+      const style = window.getComputedStyle(node);
+      const canScrollY =
+         (style.overflowY === "auto" || style.overflowY === "scroll") &&
+         node.scrollHeight > node.clientHeight;
+      if (canScrollY) return node;
+      node = node.parentElement;
+   }
+   return null;
+}
+
+function scrollCursorIntoView(
+   wrapper: HTMLElement,
+   coords: { top: number; bottom: number; left: number; right: number },
+) {
+   const viewport = getScrollableAncestor(wrapper);
+   if (!viewport) return;
+
+   const viewportRect = viewport.getBoundingClientRect();
+
+   if (coords.top < viewportRect.top + SCROLL_MARGIN) {
+      viewport.scrollTop -= viewportRect.top + SCROLL_MARGIN - coords.top;
+   } else if (coords.bottom > viewportRect.bottom - SCROLL_MARGIN) {
+      viewport.scrollTop +=
+         coords.bottom - (viewportRect.bottom - SCROLL_MARGIN);
+   }
+
+   if (coords.left < viewportRect.left + SCROLL_MARGIN) {
+      viewport.scrollLeft -= viewportRect.left + SCROLL_MARGIN - coords.left;
+   } else if (coords.right > viewportRect.right - SCROLL_MARGIN) {
+      viewport.scrollLeft +=
+         coords.right - (viewportRect.right - SCROLL_MARGIN);
+   }
+}
 
 export default function MarkdownEditor({
    initialMarkdown = "# Hello world",
@@ -44,12 +83,12 @@ export default function MarkdownEditor({
    const modeRef = useRef<VimMode>("normal");
    const wrapperRef = useRef<HTMLDivElement>(null);
 
-   const anchorPosRef = useRef<number | null>(null); // visual-mode anchor
-   const goalColumnRef = useRef<number | null>(null); // j/k goal column
-   const registerRef = useRef<string>(""); // yank/delete register
+   const anchorPosRef = useRef<number | null>(null);
+   const goalColumnRef = useRef<number | null>(null);
+   const registerRef = useRef<string>("");
    const pendingOperatorRef = useRef<"d" | "c" | "y" | null>(null);
-   const pendingGRef = useRef(false); // waiting for second "g" in "gg"
-   const pendingReplaceRef = useRef(false); // waiting for char after "r"
+   const pendingGRef = useRef(false);
+   const pendingReplaceRef = useRef(false);
 
    const [cursorRect, setCursorRect] = useState<BlockCursorRect | null>(null);
    const [selectionRects, setSelectionRects] = useState<BlockCursorRect[]>([]);
@@ -62,8 +101,21 @@ export default function MarkdownEditor({
    function updateCursor(view: EditorView) {
       const wrapper = wrapperRef.current;
       if (!wrapper) return;
-      const wrapperRect = wrapper.getBoundingClientRect();
       const { from, to, head } = view.state.selection;
+
+      let headCoords;
+      try {
+         headCoords = view.coordsAtPos(head);
+      } catch {
+         setCursorRect(null);
+         setSelectionRects([]);
+         return;
+      }
+
+      scrollCursorIntoView(wrapper, headCoords);
+
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const startCoords = view.coordsAtPos(head); // re-measure post-scroll
 
       if (modeRef.current === "visual" && from !== to) {
          try {
@@ -86,13 +138,6 @@ export default function MarkdownEditor({
          setSelectionRects([]);
       }
 
-      let startCoords;
-      try {
-         startCoords = view.coordsAtPos(head);
-      } catch {
-         setCursorRect(null);
-         return;
-      }
       const height = startCoords.bottom - startCoords.top;
       const top = startCoords.top - wrapperRect.top;
       const left = startCoords.left - wrapperRect.left;
@@ -109,9 +154,7 @@ export default function MarkdownEditor({
             const endCoords = view.coordsAtPos(head + 1);
             const measured = endCoords.left - startCoords.left;
             if (measured > 0 && measured < 40) width = measured;
-         } catch {
-            // keep fallback width
-         }
+         } catch {}
       }
       setCursorRect({ top, left, width, height });
    }
