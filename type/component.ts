@@ -41,8 +41,3 @@ export interface MarkdownRenderProps {
 export interface DesktopGuardProps {
   children: React.ReactNode;
 }
-
-export interface DialogProps {
-  open: boolean;
-  onOpenChange?: (open: boolean) => void;
-}
