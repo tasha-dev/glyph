@@ -14,7 +14,6 @@ export default function LoginPage() {
           <Heading className="size-15" />
         </div>
       </div>
-
       <main className="h-dvh overflow-auto lg:flex items-center justify-center">
         <LoginForm className="lg:max-w-xl w-full mx-auto" />
       </main>

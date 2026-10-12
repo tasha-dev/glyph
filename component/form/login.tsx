@@ -17,6 +17,7 @@ import { Input } from "@/component/ui/input";
 import { Field, FieldError, FieldLabel } from "@/component/ui/field";
 import { cn } from "@/lib/util";
 import Google from "../ui/icon/google";
+import { Loader2, Send } from "lucide-react";
 
 export default function LoginForm({ className }: ClassOnlyProps) {
   const form = useForm<loginFormType>({
@@ -99,7 +100,12 @@ export default function LoginForm({ className }: ClassOnlyProps) {
         </div>
         <CardFooter className="grid gap-3">
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Send />
+            )}
+            Sign in
           </Button>
           <div className="flex items-center gap-3">
             <div className="flex-1 border-b border-b-foreground/10 w-full h-0" />
