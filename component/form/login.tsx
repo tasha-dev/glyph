@@ -18,8 +18,14 @@ import { Field, FieldError, FieldLabel } from "@/component/ui/field";
 import { cn } from "@/lib/util";
 import Google from "../ui/icon/google";
 import { Loader2, Send } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { account } from "@/lib/appwrite/client";
+import { toast } from "sonner";
+import { AppwriteException } from "appwrite";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm({ className }: ClassOnlyProps) {
+  const router = useRouter();
   const form = useForm<loginFormType>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -28,8 +34,26 @@ export default function LoginForm({ className }: ClassOnlyProps) {
     },
   });
 
+  const mutation = useMutation({
+    mutationFn: ({ email, password }: loginFormType) =>
+      account.createEmailPasswordSession({
+        email,
+        password,
+      }),
+  });
+
   const onSubmit: SubmitHandler<loginFormType> = async (data) => {
-    console.log(data);
+    try {
+      await mutation.mutateAsync(data);
+
+      toast.success(
+        "You've successfully signed in to your account. Welcome back!",
+      );
+      router.push("/");
+    } catch (err) {
+      const error = err as AppwriteException;
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -89,6 +113,7 @@ export default function LoginForm({ className }: ClassOnlyProps) {
           />
           <div className="flex items-center justify-end">
             <Button
+              disabled={form.formState.isSubmitting}
               type="button"
               variant={"link"}
               className={"px-0"}
