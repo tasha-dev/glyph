@@ -1,9 +1,5 @@
 import { Note } from "@/store/general";
 
-export interface RootLayoutProps {
-  children: React.ReactNode;
-}
-
 export interface ClassOnlyProps {
   className?: string;
 }
@@ -46,12 +42,17 @@ export interface MarkdownRenderProps {
   className?: string;
 }
 
-export interface DesktopGuardProps {
-  children: React.ReactNode;
-}
-
 export interface RecoverContainerProps {
   userId?: string;
   secret?: string;
   expire?: string;
+}
+
+export interface ChildrenOnlyProps {
+  children: React.ReactNode;
+}
+
+export interface AuthGuardProps {
+  children: React.ReactNode;
+  mode?: "auth-only" | "disabled" | "no-auth-only";
 }

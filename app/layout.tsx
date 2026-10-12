@@ -1,4 +1,4 @@
-import { RootLayoutProps } from "@/type/component";
+import { ChildrenOnlyProps } from "@/type/component";
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
 import { Inter, Vazirmatn } from "next/font/google";
@@ -6,6 +6,7 @@ import { cn } from "@/lib/util";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/component/ui/tooltip";
 import { Toaster } from "@/component/ui/sonner";
+import ReactQueryProvider from "@/component/reactQueryProvider";
 
 const APP_NAME = "Glyph";
 const APP_DESCRIPTION =
@@ -108,18 +109,20 @@ const vazir = Vazirmatn({
   variable: "--font-vazir",
 });
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: ChildrenOnlyProps) {
   return (
-    <html
-      suppressHydrationWarning
-      className={cn(inter.className, vazir.className)}
-    >
-      <ThemeProvider>
-        <body className="overflow-hidden h-dvh w-dvw">
-          <Toaster position="bottom-center" />
-          <TooltipProvider>{children}</TooltipProvider>
-        </body>
-      </ThemeProvider>
-    </html>
+    <ReactQueryProvider>
+      <html
+        suppressHydrationWarning
+        className={cn(inter.className, vazir.className)}
+      >
+        <ThemeProvider>
+          <body className="overflow-hidden h-dvh w-dvw">
+            <Toaster position="bottom-center" />
+            <TooltipProvider>{children}</TooltipProvider>
+          </body>
+        </ThemeProvider>
+      </html>
+    </ReactQueryProvider>
   );
 }

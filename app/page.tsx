@@ -22,7 +22,7 @@ import { ScrollArea } from "@/component/ui/scroll-area";
 import { cn } from "@/lib/util";
 import MarkdownRenderer from "@/component/markdownRenderer";
 import CommandMenu from "@/component/command";
-import DesktopGuard from "@/component/desktopGuard";
+import DesktopGuard from "@/component/guard/desktopGuard";
 
 export default function HomePage() {
   const editorRef = useRef<HTMLDivElement | null>(null);
