@@ -13,7 +13,7 @@ export default function RecoveryPageContainer({
   secret,
 }: RecoverContainerProps) {
   const router = useRouter();
-  const isValid = Boolean(userId && secret && isExpirationValid(expire));
+  const isValid = !!userId && !!secret && isExpirationValid(expire);
 
   useEffect(() => {
     if (!isValid) {
@@ -30,7 +30,11 @@ export default function RecoveryPageContainer({
     return (
       <section>
         <main className="flex items-center justify-center lg:h-dvh">
-          <RecoveryForm className="mx-auto h-dvh w-full overflow-auto rounded-none bg-transparent ring-0 lg:h-auto lg:max-w-xl lg:overflow-hidden lg:rounded-xl lg:bg-card lg:ring-1" />
+          <RecoveryForm
+            className="mx-auto h-dvh w-full overflow-auto rounded-none bg-transparent ring-0 lg:h-auto lg:max-w-xl lg:overflow-hidden lg:rounded-xl lg:bg-card lg:ring-1"
+            secret={secret}
+            userId={userId}
+          />
         </main>
       </section>
     );

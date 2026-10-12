@@ -1,6 +1,6 @@
 "use client";
 
-import { ClassOnlyProps } from "@/type/component";
+import { ClassOnlyProps, RecoveryFormProps } from "@/type/component";
 import {
   CardHeader,
   Card,
@@ -16,8 +16,18 @@ import { Input } from "@/component/ui/input";
 import { Field, FieldError, FieldLabel } from "@/component/ui/field";
 import { Loader2, Send } from "lucide-react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { account } from "@/lib/appwrite/client";
+import { toast } from "sonner";
+import { AppwriteException } from "appwrite";
+import { useRouter } from "next/navigation";
 
-export default function RecoveryForm({ className }: ClassOnlyProps) {
+export default function RecoveryForm({
+  className,
+  secret,
+  userId,
+}: RecoveryFormProps) {
+  const router = useRouter();
   const form = useForm<recoveryFormType>({
     resolver: zodResolver(recoveryFormSchema),
     defaultValues: {
@@ -26,8 +36,27 @@ export default function RecoveryForm({ className }: ClassOnlyProps) {
     },
   });
 
+  const recoveryMutation = useMutation({
+    mutationFn: (data: recoveryFormType) =>
+      account.updateRecovery({
+        password: data.password,
+        secret,
+        userId,
+      }),
+  });
+
   const onSubmit: SubmitHandler<recoveryFormType> = async (data) => {
-    console.log(data);
+    try {
+      await recoveryMutation.mutateAsync(data);
+      toast.success(
+        "Your password has been changed successfully. You can now log in with your new password.",
+      );
+
+      router.push("/auth/login");
+    } catch (err) {
+      const error = err as AppwriteException;
+      toast.error(error.message);
+    }
   };
 
   return (

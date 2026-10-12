@@ -16,8 +16,8 @@ import { Button } from "@/component/ui/button";
 import { Input } from "@/component/ui/input";
 import { Field, FieldError, FieldLabel } from "@/component/ui/field";
 import { cn } from "@/lib/util";
-import Google from "../ui/icon/google";
 import { Loader2, Send } from "lucide-react";
+import LoginWithGoogle from "../loginWithGoogle";
 
 export default function SignupForm({ className }: ClassOnlyProps) {
   const form = useForm<signupFormType>({
@@ -125,14 +125,7 @@ export default function SignupForm({ className }: ClassOnlyProps) {
             </span>
             <div className="flex-1 border-b border-b-foreground/10 w-full h-0" />
           </div>
-          <Button
-            type="button"
-            disabled={form.formState.isSubmitting}
-            variant={"secondary"}
-          >
-            <Google />
-            Continue with Google
-          </Button>
+          <LoginWithGoogle />
           <p className="text-sm font-normal shrink-0 text-muted-foreground">
             Already have an account?{" "}
             <Link href="/auth/login" className="font-bold text-foreground">

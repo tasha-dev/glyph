@@ -60,3 +60,9 @@ export interface AuthGuardProps {
 export interface LoginWithGoogleProps {
   disabled?: boolean;
 }
+
+export interface RecoveryFormProps {
+  className?: string;
+  secret: string;
+  userId: string;
+}

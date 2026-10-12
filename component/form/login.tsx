@@ -16,7 +16,6 @@ import { Button } from "@/component/ui/button";
 import { Input } from "@/component/ui/input";
 import { Field, FieldError, FieldLabel } from "@/component/ui/field";
 import { cn } from "@/lib/util";
-import Google from "../ui/icon/google";
 import { Loader2, Send } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { account } from "@/lib/appwrite/client";
@@ -40,6 +39,14 @@ export default function LoginForm({ className }: ClassOnlyProps) {
       account.createEmailPasswordSession({
         email,
         password,
+      }),
+  });
+
+  const recoveryMutation = useMutation({
+    mutationFn: (email: string) =>
+      account.createRecovery({
+        email,
+        url: `${window.location.origin}/recovery`,
       }),
   });
 
@@ -114,11 +121,30 @@ export default function LoginForm({ className }: ClassOnlyProps) {
           />
           <div className="flex items-center justify-end">
             <Button
-              disabled={form.formState.isSubmitting}
               type="button"
               variant={"link"}
               className={"px-0"}
               size={"xs"}
+              disabled={
+                form.formState.isSubmitting || recoveryMutation.isPending
+              }
+              onClick={async () => {
+                const isValid = await form.trigger("email");
+
+                if (isValid) {
+                  const email = form.getValues("email");
+
+                  try {
+                    await recoveryMutation.mutateAsync(email);
+                    toast.success(
+                      "If an account exists with this email, you'll receive instructions to reset your password.",
+                    );
+                  } catch (err) {
+                    const error = err as AppwriteException;
+                    toast.error(error.message);
+                  }
+                }
+              }}
             >
               Forgot password?
             </Button>
