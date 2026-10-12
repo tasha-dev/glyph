@@ -56,3 +56,7 @@ export interface AuthGuardProps {
   children: React.ReactNode;
   mode?: "auth-only" | "disabled" | "no-auth-only";
 }
+
+export interface LoginWithGoogleProps {
+  disabled?: boolean;
+}

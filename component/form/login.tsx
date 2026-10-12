@@ -23,6 +23,7 @@ import { account } from "@/lib/appwrite/client";
 import { toast } from "sonner";
 import { AppwriteException } from "appwrite";
 import { useRouter } from "next/navigation";
+import LoginWithGoogle from "../loginWithGoogle";
 
 export default function LoginForm({ className }: ClassOnlyProps) {
   const router = useRouter();
@@ -139,14 +140,7 @@ export default function LoginForm({ className }: ClassOnlyProps) {
             </span>
             <div className="flex-1 border-b border-b-foreground/10 w-full h-0" />
           </div>
-          <Button
-            type="button"
-            disabled={form.formState.isSubmitting}
-            variant={"secondary"}
-          >
-            <Google />
-            Continue with Google
-          </Button>
+          <LoginWithGoogle disabled={form.formState.isSubmitting} />
           <p className="text-sm font-normal shrink-0 text-muted-foreground">
             Don't have an account?{" "}
             <Link href="/auth/signup" className="font-bold text-foreground">
