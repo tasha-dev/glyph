@@ -23,6 +23,14 @@ export interface ErrorPageProps {
   };
 }
 
+export interface RecoveryPageProps {
+  searchParams: Promise<{
+    userId?: string;
+    secret?: string;
+    expire?: string;
+  }>;
+}
+
 export interface NoteItemProps {
   className?: string;
   data: Note;
@@ -40,4 +48,10 @@ export interface MarkdownRenderProps {
 
 export interface DesktopGuardProps {
   children: React.ReactNode;
+}
+
+export interface RecoverContainerProps {
+  userId?: string;
+  secret?: string;
+  expire?: string;
 }

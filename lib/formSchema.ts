@@ -34,6 +34,17 @@ export const signupFormSchema = z
     path: ["confirmPassword"],
   });
 
+export const recoveryFormSchema = z
+  .object({
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string().min(1, "Please confirm your password."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
 export type signupFormType = z.infer<typeof signupFormSchema>;
 export type createNewNoteFormType = z.infer<typeof createNewNoteFormSchema>;
 export type loginFormType = z.infer<typeof loginFormSchema>;
+export type recoveryFormType = z.infer<typeof recoveryFormSchema>;

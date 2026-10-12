@@ -25,6 +25,7 @@ export default function SignupForm({ className }: ClassOnlyProps) {
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
