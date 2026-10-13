@@ -66,3 +66,9 @@ export interface RecoveryFormProps {
   secret: string;
   userId: string;
 }
+
+export interface GooglePageProps {
+  searchParams: Promise<{
+    status?: "success" | "failure";
+  }>;
+}

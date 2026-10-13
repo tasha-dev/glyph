@@ -14,8 +14,8 @@ export default function LoginWithGoogle({
     try {
       account.createOAuth2Session({
         provider: OAuthProvider.Google,
-        success: `${window.location.origin}`,
-        failure: `${window.location.origin}/login`,
+        success: `${window.location.origin}/auth/google?status=success`,
+        failure: `${window.location.origin}/auth/google?status=failure`,
       });
     } catch {
       toast.error("Unable to start Google login. Please try again.");
