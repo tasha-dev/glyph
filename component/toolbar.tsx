@@ -29,6 +29,9 @@ import { useState } from "react";
 import { exportMarkdown, printWithDelay } from "@/lib/file";
 import useNotesStore from "@/store/notes";
 import { useAuthFetch } from "@/context/authFetchContext";
+import { Blobatar } from "@blobatar/react";
+import "blobatar/motion.css";
+import Logout from "./popover/logout";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
   const [open, setOpen] = useState<boolean>(false);
@@ -57,20 +60,37 @@ export default function Toolbar({ className }: ClassOnlyProps) {
           }
         />
         <DropdownMenuContent className={"w-auto"} sideOffset={10}>
-          {!authFetch?.data && (
+          {!authFetch?.data ? (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              render={
+                <Link href="/auth/login">
+                  <LogIn />
+                  Login
+                </Link>
+              }
+            />
+          ) : (
             <>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                render={
-                  <Link href="/auth/login">
-                    <LogIn />
-                    Login
-                  </Link>
-                }
-              />
-              <DropdownMenuSeparator />
+              <div className="p-1 mx-1 flex items-center gap-2">
+                <Blobatar
+                  name={authFetch.data.name}
+                  className="size-7 rounded-full shrink-0"
+                  animate="hover"
+                />
+                <div className="flex-1">
+                  <span className="block truncate text-left text-foreground text-sm">
+                    {authFetch.data.name}
+                  </span>
+                  <span className="block truncate text-left text-muted-foreground text-xs">
+                    {authFetch.data.email}
+                  </span>
+                </div>
+              </div>
+              <Logout />
             </>
           )}
+          <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer" onClick={toggle}>
             <PanelLeft />
             Toggle side bar
