@@ -23,6 +23,7 @@ import { cn } from "@/lib/util";
 import MarkdownRenderer from "@/component/markdownRenderer";
 import CommandMenu from "@/component/command";
 import DesktopGuard from "@/component/guard/desktopGuard";
+import AuthGuard from "@/component/guard/authGuard";
 
 export default function HomePage() {
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -34,98 +35,100 @@ export default function HomePage() {
 
   return (
     <DesktopGuard>
-      <CommandMenu />
-      {activeNote && (
-        <section className="hidden print:block">
-          <MarkdownRenderer>{activeNote.content}</MarkdownRenderer>
-        </section>
-      )}
-      <section className="relative z-0 print:hidden">
-        <SideBar className="z-30" />
-        <div inert={open ? true : undefined}>
-          <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
-          <main
-            onClick={(e) => {
-              if (activeNote) {
-                e.preventDefault();
-              }
-            }}
-          >
-            {activeNote ? (
-              <>
-                <div className="flex items-center justif-between gap-2 z-10 fixed bottom-2 right-2 flex-wrap">
-                  <div
-                    className={buttonVariants({
-                      size: "default",
-                      variant: "secondary",
-                      className: "shadow-lg shadow-black/10",
-                    })}
-                  >
-                    {activeNote.title}.md
-                  </div>
-                  {mode !== "disabled" && (
+      <AuthGuard mode="disabled">
+        <CommandMenu />
+        {activeNote && (
+          <section className="hidden print:block">
+            <MarkdownRenderer>{activeNote.content}</MarkdownRenderer>
+          </section>
+        )}
+        <section className="relative z-0 print:hidden">
+          <SideBar className="z-30" />
+          <div inert={open ? true : undefined}>
+            <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
+            <main
+              onClick={(e) => {
+                if (activeNote) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              {activeNote ? (
+                <>
+                  <div className="flex items-center justif-between gap-2 z-10 fixed bottom-2 right-2 flex-wrap">
                     <div
-                      data-mode={mode}
                       className={buttonVariants({
-                        variant: "secondary",
                         size: "default",
-                        className: cn(
-                          "border-dashed !border-current transition-colors duration-300 shadow-lg shadow-black/10",
-                          "data-[mode=normal]:text-sky-500",
-                          "data-[mode=insert]:text-rose-500",
-                          "data-[mode=visual]:text-amber-500",
-                        ),
+                        variant: "secondary",
+                        className: "shadow-lg shadow-black/10",
                       })}
                     >
-                      -- {mode.toUpperCase()} --
+                      {activeNote.title}.md
                     </div>
+                    {mode !== "disabled" && (
+                      <div
+                        data-mode={mode}
+                        className={buttonVariants({
+                          variant: "secondary",
+                          size: "default",
+                          className: cn(
+                            "border-dashed !border-current transition-colors duration-300 shadow-lg shadow-black/10",
+                            "data-[mode=normal]:text-sky-500",
+                            "data-[mode=insert]:text-rose-500",
+                            "data-[mode=visual]:text-amber-500",
+                          ),
+                        })}
+                      >
+                        -- {mode.toUpperCase()} --
+                      </div>
+                    )}
+                  </div>
+                  {notes.map(
+                    (item, index) =>
+                      item.id === activeNoteId && (
+                        <Editor
+                          key={index}
+                          initialMarkdown={item.content}
+                          disabled={disabled}
+                          ref={editorRef}
+                          onChange={(content) => {
+                            updateNote(item.id, item.title, content);
+                          }}
+                        />
+                      ),
                   )}
-                </div>
-                {notes.map(
-                  (item, index) =>
-                    item.id === activeNoteId && (
-                      <Editor
-                        key={index}
-                        initialMarkdown={item.content}
-                        disabled={disabled}
-                        ref={editorRef}
-                        onChange={(content) => {
-                          updateNote(item.id, item.title, content);
-                        }}
-                      />
-                    ),
-                )}
-              </>
-            ) : (
-              <ScrollArea className={"h-dvh overflow-auto p-4"}>
-                <div className="min-h-dvh flex items-center justify-center  max-w-2xl mx-auto">
-                  <Empty className="p-0 m-0 rounded-0">
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Heading />
-                      </EmptyMedia>
-                      <EmptyTitle>Nothing to Show Yet</EmptyTitle>
-                      <EmptyDescription>
-                        Choose a Markdown file from the left sidebar to begin
-                        editing <br /> or Start new file from there. <br /> Your
-                        selected file will appear here.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent className="flex-row justify-center gap-2">
-                      <Button onClick={toggle}>
-                        Open sidebar
-                        <KbdGroup>
-                          <Kbd>s</Kbd>
-                        </KbdGroup>
-                      </Button>
-                    </EmptyContent>
-                  </Empty>
-                </div>
-              </ScrollArea>
-            )}
-          </main>
-        </div>
-      </section>
+                </>
+              ) : (
+                <ScrollArea className={"h-dvh overflow-auto p-4"}>
+                  <div className="min-h-dvh flex items-center justify-center  max-w-2xl mx-auto">
+                    <Empty className="p-0 m-0 rounded-0">
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Heading />
+                        </EmptyMedia>
+                        <EmptyTitle>Nothing to Show Yet</EmptyTitle>
+                        <EmptyDescription>
+                          Choose a Markdown file from the left sidebar to begin
+                          editing <br /> or Start new file from there. <br />{" "}
+                          Your selected file will appear here.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                      <EmptyContent className="flex-row justify-center gap-2">
+                        <Button onClick={toggle}>
+                          Open sidebar
+                          <KbdGroup>
+                            <Kbd>s</Kbd>
+                          </KbdGroup>
+                        </Button>
+                      </EmptyContent>
+                    </Empty>
+                  </div>
+                </ScrollArea>
+              )}
+            </main>
+          </div>
+        </section>
+      </AuthGuard>
     </DesktopGuard>
   );
 }

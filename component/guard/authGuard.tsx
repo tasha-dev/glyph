@@ -1,84 +1,16 @@
 "use client";
 
+import { type Models } from "appwrite";
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import { AppwriteException } from "appwrite";
-import { Loader2, AlertCircleIcon } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 import { account } from "@/lib/appwrite/client";
-import type { AuthGuardProps, ChildrenOnlyProps } from "@/type/component";
-import type { AppwriteUser } from "@/type/api";
-
-import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertTitle,
-} from "@/component/ui/alert";
-import { Button } from "@/component/ui/button";
-import { ScrollArea } from "@/component/ui/scroll-area";
-
-import { createContext } from "react";
-
-export const AuthFetchContext = createContext<
-  UseQueryResult<AppwriteUser, AppwriteException> | undefined
->(undefined);
-
-function AlertHolder({ children }: ChildrenOnlyProps) {
-  return (
-    <ScrollArea className="h-dvh">
-      <div className="flex min-h-dvh items-center justify-center p-4">
-        {children}
-      </div>
-    </ScrollArea>
-  );
-}
-
-function LoadingScreen() {
-  return (
-    <main
-      className="flex h-dvh items-center justify-center p-4"
-      role="status"
-      aria-label="Loading user session"
-    >
-      <Loader2 className="size-5 animate-spin text-foreground" />
-    </main>
-  );
-}
-
-function ErrorScreen({ onRetry }: { onRetry: () => void }) {
-  return (
-    <AlertHolder>
-      <Alert variant="destructive">
-        <AlertCircleIcon />
-        <AlertTitle>Failed to load your session</AlertTitle>
-        <AlertDescription>
-          We couldn't verify your session. Check your internet connection and
-          try again.
-        </AlertDescription>
-        <AlertAction>
-          <Button onClick={onRetry}>Retry</Button>
-        </AlertAction>
-      </Alert>
-    </AlertHolder>
-  );
-}
-
-function SignedInScreen() {
-  return (
-    <AlertHolder>
-      <Alert variant="destructive">
-        <AlertCircleIcon />
-        <AlertTitle>Already signed in</AlertTitle>
-        <AlertDescription>
-          You're currently signed in. Please sign out of your account to access
-          this page.
-        </AlertDescription>
-      </Alert>
-    </AlertHolder>
-  );
-}
+import type { AuthGuardProps } from "@/type/component";
+import { AuthFetchProvider } from "@/context/authFetchContext";
+import { Alert, AlertDescription, AlertTitle } from "@/component/ui/alert";
+import { isUnauthorized } from "@/lib/util";
 
 export default function AuthGuard({
   children,
@@ -86,58 +18,70 @@ export default function AuthGuard({
 }: AuthGuardProps) {
   const router = useRouter();
 
-  const authFetch = useQuery<AppwriteUser, AppwriteException>({
-    queryKey: ["user-info"],
+  const fetch = useQuery<Models.User<Models.Preferences>, Error>({
+    queryKey: ["auth", "current-user"],
     queryFn: () => account.get(),
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  const isUnauthorized = authFetch.isError && authFetch.error.code === 401;
+  const { data: user, error, isPending, isError, isSuccess } = fetch;
 
-  const isAuthenticated = authFetch.isSuccess;
+  const unauthorized = isError && isUnauthorized(error);
+  const authenticated = isSuccess && user !== undefined;
 
   useEffect(() => {
-    if (mode === "auth-only" && isUnauthorized) {
-      router.replace("/auth/login");
+    if (mode === "no-auth-only" && authenticated) {
+      router.replace("/");
     }
-  }, [mode, isUnauthorized, router]);
+  }, [mode, authenticated, router]);
 
-  if (authFetch.isPending || authFetch.isLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (authFetch.isError && !isUnauthorized) {
-    return <ErrorScreen onRetry={() => void authFetch.refetch()} />;
-  }
-
-  if (mode === "auth-only") {
-    if (isUnauthorized) {
-      return <LoadingScreen />;
-    }
-
+  if (isPending) {
     return (
-      <AuthFetchContext.Provider value={authFetch}>
-        {children}
-      </AuthFetchContext.Provider>
+      <div
+        className="flex min-h-dvh items-center justify-center"
+        role="status"
+        aria-label="Checking authentication"
+      >
+        <Loader2 className="size-7 animate-spin text-primary" />
+      </div>
     );
   }
 
-  if (mode === "disabled") {
-    if (isAuthenticated) {
-      return <SignedInScreen />;
-    }
-
+  if (isError && !unauthorized) {
     return (
-      <AuthFetchContext.Provider value={authFetch}>
-        {children}
-      </AuthFetchContext.Provider>
+      <div className="flex min-h-dvh items-center justify-center p-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Authentication failed</AlertTitle>
+          <AlertDescription>
+            We couldn't verify your session. Please try again.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
-  // Disabled mode: render children regardless of authentication status.
-  return (
-    <AuthFetchContext.Provider value={authFetch}>
-      {children}
-    </AuthFetchContext.Provider>
-  );
+  const canRender =
+    mode === "disabled"
+      ? authenticated || unauthorized
+      : mode === "auth-only"
+        ? authenticated
+        : mode === "no-auth-only"
+          ? unauthorized
+          : false;
+
+  if (!canRender) {
+    return (
+      <div
+        className="flex min-h-dvh items-center justify-center"
+        role="status"
+        aria-label="Redirecting"
+      >
+        <Loader2 className="size-7 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return <AuthFetchProvider value={fetch}>{children}</AuthFetchProvider>;
 }

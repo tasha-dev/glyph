@@ -18,8 +18,14 @@ import { Field, FieldError, FieldLabel } from "@/component/ui/field";
 import { cn } from "@/lib/util";
 import { Loader2, Send } from "lucide-react";
 import LoginWithGoogle from "../loginWithGoogle";
+import { useMutation } from "@tanstack/react-query";
+import { account } from "@/lib/appwrite/client";
+import { AppwriteException, ID } from "appwrite";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm({ className }: ClassOnlyProps) {
+  const router = useRouter();
   const form = useForm<signupFormType>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -29,8 +35,28 @@ export default function SignupForm({ className }: ClassOnlyProps) {
     },
   });
 
+  const mutation = useMutation({
+    mutationFn: (data: signupFormType) =>
+      account.create({
+        email: data.email,
+        password: data.password,
+        userId: ID.unique(),
+        name: data.name,
+      }),
+  });
+
   const onSubmit: SubmitHandler<signupFormType> = async (data) => {
-    console.log(data);
+    try {
+      await mutation.mutateAsync(data);
+
+      toast.success(
+        "Your account is ready! Welcome aboard. You can now sign in and start exploring.",
+      );
+      router.push("/auth/login");
+    } catch (err) {
+      const error = err as AppwriteException;
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -60,6 +86,26 @@ export default function SignupForm({ className }: ClassOnlyProps) {
                   type="email"
                   placeholder="you@example.com"
                   autoComplete="email"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Full name</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type="text"
+                  placeholder="Enter your full name"
+                  autoComplete="name"
                   aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid && (

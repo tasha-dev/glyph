@@ -46,7 +46,7 @@ export default function LoginForm({ className }: ClassOnlyProps) {
     mutationFn: (email: string) =>
       account.createRecovery({
         email,
-        url: `${window.location.origin}/recovery`,
+        url: `${window.location.origin}/auth/recovery`,
       }),
   });
 

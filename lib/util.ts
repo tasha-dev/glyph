@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { AppwriteException } from "appwrite";
 import { isFuture, isValid, parseISO, formatDistance } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import type { EditorView } from "@tiptap/pm/view";
@@ -97,4 +98,8 @@ export function isExpirationValid(expire: string | undefined): boolean {
     const expirationDate = parseISO(expire);
     return isValid(expirationDate) && isFuture(expirationDate);
   } else return false;
+}
+
+export function isUnauthorized(error: unknown): boolean {
+  return error instanceof AppwriteException && error.code === 401;
 }

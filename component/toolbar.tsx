@@ -28,9 +28,11 @@ import useSideBarStore from "@/store/sidebar";
 import { useState } from "react";
 import { exportMarkdown, printWithDelay } from "@/lib/file";
 import useNotesStore from "@/store/notes";
+import { useAuthFetch } from "@/context/authFetchContext";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
   const [open, setOpen] = useState<boolean>(false);
+  const authFetch = useAuthFetch();
 
   const { theme, setTheme } = useTheme();
   const { notes } = useNotesStore();
@@ -55,16 +57,20 @@ export default function Toolbar({ className }: ClassOnlyProps) {
           }
         />
         <DropdownMenuContent className={"w-auto"} sideOffset={10}>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            render={
-              <Link href="/auth/login">
-                <LogIn />
-                Login
-              </Link>
-            }
-          />
-          <DropdownMenuSeparator />
+          {!authFetch?.data && (
+            <>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                render={
+                  <Link href="/auth/login">
+                    <LogIn />
+                    Login
+                  </Link>
+                }
+              />
+              <DropdownMenuSeparator />
+            </>
+          )}
           <DropdownMenuItem className="cursor-pointer" onClick={toggle}>
             <PanelLeft />
             Toggle side bar
