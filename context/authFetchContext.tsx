@@ -1,23 +1,17 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
-import type { UseQueryResult } from "@tanstack/react-query";
-import type { Models } from "appwrite";
-
-type AuthFetchContextValue = UseQueryResult<
-  Models.User<Models.Preferences>,
-  Error
->;
+import {
+  AuthFetchContextProviderProps,
+  AuthFetchContextValue,
+} from "@/type/context";
+import { createContext, useContext } from "react";
 
 const AuthFetchContext = createContext<AuthFetchContextValue | null>(null);
 
 export function AuthFetchProvider({
   value,
   children,
-}: {
-  value: AuthFetchContextValue;
-  children: ReactNode;
-}) {
+}: AuthFetchContextProviderProps) {
   return (
     <AuthFetchContext.Provider value={value}>
       {children}

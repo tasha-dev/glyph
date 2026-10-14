@@ -13,109 +13,125 @@ import AddNote from "./popover/addNote";
 import NoteItem from "./noteItem";
 import useDisableTabExcept from "@/hook/useDisableTabExpect";
 import useVimNavigation from "@/hook/useVimNavigation";
+import { useAuthFetch } from "@/context/authFetchContext";
+import { useUserNotes } from "@/context/userNotesContext";
 
 export default function SideBar({ className }: ClassOnlyProps) {
-   const { open, toggle } = useSideBarStore();
-   const editorStore = useEditorStore();
-   const { notes } = useNotesStore();
+  const { open, toggle } = useSideBarStore();
+  const editorStore = useEditorStore();
+  const { notes } = useNotesStore();
+  const { data } = useAuthFetch();
+  const dbNotes = useUserNotes();
 
-   const sideBarRef = useRef<HTMLDivElement>(null);
+  const sideBarRef = useRef<HTMLDivElement>(null);
 
-   useDisableTabExcept(sideBarRef, open);
-   useVimNavigation(sideBarRef, {
-      disabled: !open,
-      onSelect: (_, item) => item.click(),
-   });
+  useDisableTabExcept(sideBarRef, open);
+  useVimNavigation(sideBarRef, {
+    disabled: !open,
+    onSelect: (_, item) => item.click(),
+  });
 
-   useEffect(() => {
-      if (!open) editorStore.setDisabled(false);
-      else editorStore.setDisabled(true);
-   }, [open]);
+  useEffect(() => {
+    if (!open) editorStore.setDisabled(false);
+    else editorStore.setDisabled(true);
+  }, [open]);
 
-   useKeyboard(
-      "s",
-      () => toggle(),
-      false,
-      editorStore.mode === "disabled" && open,
-   );
+  useKeyboard(
+    "s",
+    () => toggle(),
+    false,
+    editorStore.mode === "disabled" && open,
+  );
 
-   useKeyboard(
-      "escape",
-      () => toggle(),
-      false,
-      editorStore.mode === "disabled" && open,
-   );
+  useKeyboard(
+    "escape",
+    () => toggle(),
+    false,
+    editorStore.mode === "disabled" && open,
+  );
 
-   return (
-      <AnimatePresence key="sidebar">
-         {open && (
-            <>
-               <motion.div
-                  onClick={() => toggle()}
-                  className="fixed inset-0 z-20 backdrop-blur-3xl bg-card/10"
-                  tabIndex={0}
-                  initial={{
-                     opacity: 0,
-                  }}
-                  animate={{
-                     opacity: 1,
-                  }}
-                  exit={{
-                     opacity: 0,
-                  }}
-                  transition={{
-                     type: "spring",
-                     stiffness: 320,
-                     damping: 28,
-                     mass: 0.8,
-                     delay: 0.2,
-                  }}
-               />
-               <motion.nav
-                  ref={sideBarRef}
-                  initial={{
-                     x: -40,
-                     opacity: 0,
-                     filter: "blur(4px)",
-                  }}
-                  animate={{
-                     x: 0,
-                     opacity: 1,
-                     filter: "blur(0px)",
-                  }}
-                  exit={{
-                     x: -40,
-                     opacity: 0,
-                     filter: "blur(4px)",
-                  }}
-                  transition={{
-                     type: "spring",
-                     stiffness: 320,
-                     damping: 28,
-                     mass: 0.8,
-                  }}
-                  className={cn(
-                     "fixed left-0 bg-card border-r border-foreground/10 shadow-lg shadow-black/20 rounded-r-2xl top-0 h-dvh overflow-hidden text-foreground",
-                     "lg:w-1/3 w-3/4",
-                     className,
-                  )}
-               >
-                  <ScrollArea className={"h-dvh"}>
-                     <div className="flex items-center justify-between gap-2 p-4 border-b border-b-foreground/10">
-                        <span className="font-semibold text-lg block truncate flex-1">
-                           Your notes
-                        </span>
-                        <AddNote />
-                     </div>
-                     <div className="p-4 flex flex-col gap-3">
-                        {notes.map((item, index) => (
-                           <NoteItem key={index} data={item} />
-                        ))}
-                     </div>
-                  </ScrollArea>
-               </motion.nav>
-            </>
-         )}
-      </AnimatePresence>
-   );
+  return (
+    <AnimatePresence key="sidebar">
+      {open && (
+        <>
+          <motion.div
+            onClick={() => toggle()}
+            className="fixed inset-0 z-20 backdrop-blur-3xl bg-card/10"
+            tabIndex={0}
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 320,
+              damping: 28,
+              mass: 0.8,
+              delay: 0.2,
+            }}
+          />
+          <motion.nav
+            ref={sideBarRef}
+            initial={{
+              x: -40,
+              opacity: 0,
+              filter: "blur(4px)",
+            }}
+            animate={{
+              x: 0,
+              opacity: 1,
+              filter: "blur(0px)",
+            }}
+            exit={{
+              x: -40,
+              opacity: 0,
+              filter: "blur(4px)",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 320,
+              damping: 28,
+              mass: 0.8,
+            }}
+            className={cn(
+              "fixed left-0 bg-card border-r border-foreground/10 shadow-lg shadow-black/20 rounded-r-2xl top-0 h-dvh overflow-hidden text-foreground",
+              "lg:w-1/3 w-3/4",
+              className,
+            )}
+          >
+            <ScrollArea className={"h-dvh"}>
+              <div className="flex items-center justify-between gap-2 p-4 border-b border-b-foreground/10">
+                <span className="font-semibold text-lg block truncate flex-1">
+                  Your notes
+                </span>
+                <AddNote />
+              </div>
+              <div className="p-4 flex flex-col gap-3">
+                {data && dbNotes.data
+                  ? dbNotes.data.map((item, index) => (
+                      <NoteItem
+                        key={index}
+                        data={{
+                          content: item.content,
+                          createdAt: item.$createdAt,
+                          id: item.$id,
+                          title: item.title,
+                        }}
+                      />
+                    ))
+                  : notes.map((item, index) => (
+                      <NoteItem key={index} data={item} />
+                    ))}
+              </div>
+            </ScrollArea>
+          </motion.nav>
+        </>
+      )}
+    </AnimatePresence>
+  );
 }
