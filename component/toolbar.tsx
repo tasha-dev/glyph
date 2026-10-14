@@ -6,6 +6,7 @@ import {
   Heading,
   List,
   LogIn,
+  LogOutIcon,
   PanelLeft,
   SunMoon,
 } from "lucide-react";
@@ -31,10 +32,12 @@ import useNotesStore from "@/store/notes";
 import { useAuthFetch } from "@/context/authFetchContext";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
-import Logout from "./popover/logout";
+import Logout from "@/component/dialog/logout";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
   const [open, setOpen] = useState<boolean>(false);
+  const [logoutOpened, setLogoutOpened] = useState(false);
+
   const authFetch = useAuthFetch();
 
   const { theme, setTheme } = useTheme();
@@ -51,6 +54,7 @@ export default function Toolbar({ className }: ClassOnlyProps) {
 
   return (
     <>
+      <Logout open={logoutOpened} onOpenChange={setLogoutOpened} />
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger
           render={
@@ -87,7 +91,14 @@ export default function Toolbar({ className }: ClassOnlyProps) {
                   </span>
                 </div>
               </div>
-              <Logout />
+              <DropdownMenuItem
+                onClick={() => setLogoutOpened(true)}
+                className={"cursor-pointer"}
+                variant="destructive"
+              >
+                <LogOutIcon className="size-4" />
+                Logout
+              </DropdownMenuItem>
             </>
           )}
           <DropdownMenuSeparator />
