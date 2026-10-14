@@ -25,7 +25,7 @@ import { useState } from "react";
 import { useAuthFetch } from "@/context/authFetchContext";
 import { useUserNotes } from "@/context/userNotesContext";
 import { DATABASE_ID, TABLE_ID, tablesDB } from "@/lib/appwrite/client";
-import { Permission, Role } from "appwrite";
+import { AppwriteException, Permission, Role } from "appwrite";
 import { useMutation } from "@tanstack/react-query";
 
 export default function AddNote({ className }: ClassOnlyProps) {
@@ -37,10 +37,11 @@ export default function AddNote({ className }: ClassOnlyProps) {
 
   const userFetch = useAuthFetch();
   const userNotes = useUserNotes();
+  const isNotesAuthValid = userFetch.data && userNotes.data;
 
   const mutation = useMutation({
     mutationFn: (title: string) => {
-      if (!userFetch.data || !userNotes.data) {
+      if (!isNotesAuthValid) {
         throw new Error("User data is not available");
       }
 
@@ -66,7 +67,6 @@ export default function AddNote({ className }: ClassOnlyProps) {
 
   const onSubmit: SubmitHandler<createNewNoteFormType> = async (data) => {
     try {
-      const isNotesAuthValid = userFetch.data && userNotes.data;
       const isDuplicated = isNotesAuthValid
         ? !!userNotes.data.find((item) => item.title === data.title)
         : !!notes.find((item) => item.title === data.title);
@@ -82,8 +82,13 @@ export default function AddNote({ className }: ClassOnlyProps) {
       } else {
         toast.error("The note already exists.Try another name for it.");
       }
-    } catch {
-      toast.error("There was an error while adding the note.");
+    } catch (err) {
+      if (isNotesAuthValid) {
+        const error = err as AppwriteException;
+        toast.error(error.message);
+      } else {
+        toast.error("There was an error while adding the note.");
+      }
     } finally {
       setOpen(false);
 
@@ -94,7 +99,7 @@ export default function AddNote({ className }: ClassOnlyProps) {
   };
 
   return (
-    <Popover open={mutation.isPending ? true : open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <Button
