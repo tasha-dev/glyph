@@ -8,14 +8,12 @@ import EditNote from "./popover/editNote";
 import DeleteNote from "./popover/deleteNote";
 import useEditorStore from "@/store/editor";
 import useSideBarStore from "@/store/sidebar";
+import { useIsMobile } from "@/hook/useIsMobile";
 
-export default function NoteItem({
-  className,
-  data,
-  mode = "local",
-}: NoteItemProps) {
+export default function NoteItem({ className, data }: NoteItemProps) {
   const { setActiveNoteId, setMode } = useEditorStore();
   const { toggle } = useSideBarStore();
+  const isMobile = useIsMobile();
 
   return (
     <div
@@ -44,22 +42,39 @@ export default function NoteItem({
           </span>
         </div>
       </div>
-      <div className="shrink-0 flex items-center justify-end gap-2">
-        <EditNote data={data} />
-        <Button
-          variant="outline"
-          data-vim-item
-          size="icon"
-          onClick={() => {
-            setActiveNoteId(data.id);
-            toggle();
-            setMode("insert");
-          }}
-        >
-          <Eye />
-        </Button>
-        <DeleteNote data={data} />
-      </div>
+      {!isMobile ? (
+        <div className="shrink-0 flex items-center justify-end gap-2">
+          <EditNote data={data} />
+          <Button
+            variant="outline"
+            data-vim-item
+            size="icon"
+            onClick={() => {
+              setActiveNoteId(data.id);
+              toggle();
+              setMode("insert");
+            }}
+          >
+            <Eye />
+          </Button>
+          <DeleteNote data={data} />
+        </div>
+      ) : (
+        <div className="shrink-0 flex items-center justify-end gap-2 w-full">
+          <Button
+            variant="outline"
+            data-vim-item
+            size="icon"
+            onClick={() => {
+              setActiveNoteId(data.id);
+              toggle();
+              setMode("insert");
+            }}
+          >
+            <Eye />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

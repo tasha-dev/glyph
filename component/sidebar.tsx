@@ -15,6 +15,7 @@ import useDisableTabExcept from "@/hook/useDisableTabExpect";
 import useVimNavigation from "@/hook/useVimNavigation";
 import { useAuthFetch } from "@/context/authFetchContext";
 import { useUserNotes } from "@/context/userNotesContext";
+import { useIsMobile } from "@/hook/useIsMobile";
 
 export default function SideBar({ className }: ClassOnlyProps) {
   const { open, toggle } = useSideBarStore();
@@ -22,6 +23,7 @@ export default function SideBar({ className }: ClassOnlyProps) {
   const { notes } = useNotesStore();
   const { data } = useAuthFetch();
   const dbNotes = useUserNotes();
+  const isMobile = useIsMobile();
 
   const sideBarRef = useRef<HTMLDivElement>(null);
 
@@ -109,7 +111,7 @@ export default function SideBar({ className }: ClassOnlyProps) {
                 <span className="font-semibold text-lg block truncate flex-1">
                   Your notes
                 </span>
-                <AddNote />
+                {!isMobile && <AddNote />}
               </div>
               <div className="p-4 flex flex-col gap-3">
                 {data && dbNotes.data

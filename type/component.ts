@@ -29,7 +29,6 @@ export interface RecoveryPageProps {
 
 export interface NoteItemProps {
   className?: string;
-  mode?: "db" | "local";
   data: Note;
 }
 
