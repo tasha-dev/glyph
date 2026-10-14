@@ -2,7 +2,7 @@
 
 import { ClassOnlyProps } from "@/type/component";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -22,6 +22,11 @@ import { Field, FieldError } from "../ui/field";
 import useNotesStore from "@/store/notes";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useAuthFetch } from "@/context/authFetchContext";
+import { useUserNotes } from "@/context/userNotesContext";
+import { DATABASE_ID, TABLE_ID, tablesDB } from "@/lib/appwrite/client";
+import { Permission, Role } from "appwrite";
+import { useMutation } from "@tanstack/react-query";
 
 export default function AddNote({ className }: ClassOnlyProps) {
   const { addNote, notes } = useNotesStore();
@@ -30,12 +35,49 @@ export default function AddNote({ className }: ClassOnlyProps) {
     resolver: zodResolver(createNewNoteFormSchema),
   });
 
-  const onSubmit: SubmitHandler<createNewNoteFormType> = (data) => {
-    try {
-      const foundedItem = notes.find((item) => item.title === data.title);
+  const userFetch = useAuthFetch();
+  const userNotes = useUserNotes();
 
-      if (!foundedItem) {
-        addNote(data.title);
+  const mutation = useMutation({
+    mutationFn: (title: string) => {
+      if (!userFetch.data || !userNotes.data) {
+        throw new Error("User data is not available");
+      }
+
+      const userId = userFetch.data.$id;
+
+      return tablesDB.createRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_ID,
+        rowId: crypto.randomUUID(),
+        data: {
+          title,
+          content: "",
+          userId,
+        },
+        permissions: [
+          Permission.read(Role.user(userId)),
+          Permission.update(Role.user(userId)),
+          Permission.delete(Role.user(userId)),
+        ],
+      });
+    },
+  });
+
+  const onSubmit: SubmitHandler<createNewNoteFormType> = async (data) => {
+    try {
+      const isNotesAuthValid = userFetch.data && userNotes.data;
+      const isDuplicated = isNotesAuthValid
+        ? !!userNotes.data.find((item) => item.title === data.title)
+        : !!notes.find((item) => item.title === data.title);
+
+      if (!isDuplicated) {
+        if (!isNotesAuthValid) addNote(data.title);
+        else {
+          await mutation.mutateAsync(data.title);
+          userNotes.refetch();
+        }
+
         toast.success("The note is added successfully.");
       } else {
         toast.error("The note already exists.Try another name for it.");
@@ -52,11 +94,21 @@ export default function AddNote({ className }: ClassOnlyProps) {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={mutation.isPending ? true : open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
-          <Button size="icon" className={className} data-vim-item autoFocus>
-            <Plus />
+          <Button
+            size="icon"
+            className={className}
+            data-vim-item
+            autoFocus
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Plus />
+            )}
           </Button>
         }
       />
@@ -93,8 +145,13 @@ export default function AddNote({ className }: ClassOnlyProps) {
             className={"shrink-0"}
             type="submit"
             data-vim-item
+            disabled={mutation.isPending}
           >
-            <Plus />
+            {mutation.isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Plus />
+            )}
           </Button>
         </form>
         {form.formState.errors.title && (
