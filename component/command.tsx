@@ -163,7 +163,7 @@ export default function CommandMenu({ className }: ClassOnlyProps) {
               onSelect={() => {
                 if (activeNote !== undefined) {
                   setOpen(false);
-                  exportMarkdown(`${activeNote.title}.md`, activeNote.content);
+                  exportMarkdown(activeNote.title, activeNote.content);
                 }
               }}
             >

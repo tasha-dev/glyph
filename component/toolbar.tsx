@@ -34,12 +34,14 @@ import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
 import Logout from "@/component/dialog/logout";
 import { useIsMobile } from "@/hook/useIsMobile";
+import { useUserNotes } from "@/context/userNotesContext";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [logoutOpened, setLogoutOpened] = useState(false);
 
   const authFetch = useAuthFetch();
+  const userNotes = useUserNotes();
   const isMobile = useIsMobile();
 
   const { theme, setTheme } = useTheme();
@@ -48,7 +50,11 @@ export default function Toolbar({ className }: ClassOnlyProps) {
   const { toggle } = useSideBarStore();
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
-  const activeNote = activeNoteId && notes.find((item) => item.id);
+  const activeNote = activeNoteId
+    ? authFetch.data && userNotes.data
+      ? userNotes.data.find((item) => item.$id === activeNoteId)
+      : notes.find((item) => item.id === activeNoteId)
+    : undefined;
 
   useKeyboard("t", toggleTheme, false, mode === "normal");
   useKeyboard("s", () => toggle(), false, mode === "normal");
