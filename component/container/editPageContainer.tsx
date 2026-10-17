@@ -50,7 +50,7 @@ export default function EditPageContainer() {
             <div className="fixed top-4 right-4 z-10 items-center justify-center gap-1 print:hidden flex">
               <div
                 className={buttonVariants({
-                  size: "default",
+                  size: "lg",
                   variant: "secondary",
                   className: "shadow-lg shadow-black/10",
                 })}
@@ -91,14 +91,14 @@ export default function EditPageContainer() {
                   <div className="flex items-center justif-between gap-2 z-10 fixed bottom-2 right-2 flex-wrap">
                     <div
                       className={buttonVariants({
-                        size: "default",
+                        size: "lg",
                         variant: "secondary",
                         className: "shadow-lg shadow-black/10",
                       })}
                     >
                       {activeNote.title}.md
                     </div>
-                    {mode !== "disabled" || (
+                    {mode !== "disabled" ? (
                       <div
                         data-mode={mode}
                         className={buttonVariants({
@@ -114,6 +114,8 @@ export default function EditPageContainer() {
                       >
                         -- {mode.toUpperCase()} --
                       </div>
+                    ) : (
+                      false
                     )}
                   </div>
                   {userFetch.data && userNotes.data
