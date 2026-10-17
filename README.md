@@ -1,14 +1,12 @@
 # Glyph
 
-> **A fast, local-first Markdown editor built for developers who prefer the keyboard.**
+> **A keyboard-first Markdown editor for desktop, with synced notes and read-anywhere access.**
 
-Glyph is a lightweight WYSIWYG Markdown editor designed around one idea:
+Glyph is a lightweight WYSIWYG Markdown editor built for developers who value speed, focus, and keyboard-driven workflows.
 
-**Writing should feel fast, focused, and familiar.**
+Write and edit on desktop with Vim-style motions, keep your notes synchronized through the cloud, and access them from your phone whenever you need them.
 
-It combines a rich visual editing experience with Markdown-first workflows, Vim-style motions, local persistence, command-based actions, and a minimal interface that stays out of the way.
-
-**No account. No backend. No cloud dependency. Your notes stay in your browser.**
+**Edit on desktop. Read on mobile. Stay in sync.**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Try%20Glyph-black?style=for-the-badge)](https://glyph-sigma.vercel.app)
 
@@ -17,18 +15,20 @@ It combines a rich visual editing experience with Markdown-first workflows, Vim-
 ## ✨ Features
 
 - **WYSIWYG Markdown editing** — Write Markdown through a rich visual editing experience.
-- **Vim-style editing** — Navigate and edit using familiar Vim-inspired modes and motions.
-- **Local-first storage** — Notes persist locally in the browser using Zustand.
-- **No authentication** — Open Glyph and start writing immediately.
-- **No backend required** — The editor works without a remote database or API.
-- **Multiple notes** — Create, rename, edit, and delete Markdown files from the sidebar.
-- **Command menu** — Access commands and common actions without leaving the keyboard.
+- **Vim-style editing** — Navigate and edit documents using familiar Vim-inspired modes and motions.
+- **Cloud synchronization** — Keep your notes synchronized across devices.
+- **Progressive Web App (PWA)** — Install Glyph for an app-like experience on supported devices.
+- **Desktop editing** — Access the full keyboard-driven editing experience on desktop and laptop environments.
+- **Mobile reading** — Open and read your notes on mobile with a read-only experience.
+- **Authentication** — Sign in to access your synchronized notes.
+- **Multiple notes** — Create, rename, edit, and delete Markdown documents.
+- **Command menu** — Access common actions without leaving the keyboard.
 - **Markdown export** — Export notes as `.md` files.
-- **PDF export** — Print the current document and save it as a PDF.
-- **Dark & light themes** — Switch themes without leaving the editor.
-- **Rich Markdown** — Headings, lists, task lists, links, images, tables, highlights, underline, typography, and code blocks.
-- **Syntax highlighting** — Code blocks are highlighted with Shiki.
-- **Keyboard-first workflow** — Designed around desktop use and efficient keyboard interaction.
+- **PDF export** — Print documents and save them as PDFs.
+- **Dark & light themes** — Choose the appearance that suits your workspace.
+- **Rich Markdown** — Support for headings, lists, task lists, links, images, tables, highlights, underline, typography, and code blocks.
+- **Syntax highlighting** — Render code blocks with Shiki.
+- **Keyboard-first workflow** — Designed around efficient desktop editing and reduced dependence on the mouse.
 
 ---
 
@@ -50,11 +50,57 @@ It combines a rich visual editing experience with Markdown-first workflows, Vim-
 
 ## 🌐 Live Demo
 
-Try Glyph directly in your browser:
+Try Glyph in your browser:
 
 **[→ Open Glyph](https://glyph-sigma.vercel.app)**
 
-No account or installation is required.
+Glyph is available on desktop and mobile. Sign in to access your synchronized notes.
+
+Install Glyph as a PWA on supported devices for an app-like experience.
+
+---
+
+## 📱 Desktop & Mobile
+
+Glyph provides different experiences depending on your device.
+
+| Capability                |  Desktop  |  Mobile   |
+| ------------------------- | :-------: | :-------: |
+| View notes                |    Yes    |    Yes    |
+| Create and edit notes     |    Yes    |    No     |
+| Vim-style editing         |    Yes    |    No     |
+| Keyboard-driven commands  |    Yes    |    No     |
+| Access synchronized notes |    Yes    |    Yes    |
+| Install as a PWA          | Supported | Supported |
+
+### Desktop: Built for writing
+
+The desktop experience is where Glyph's editing capabilities shine. Use Vim-style motions, navigate documents efficiently, manage notes, and write without constantly switching between your keyboard and mouse.
+
+### Mobile: Your notes, wherever you go
+
+The mobile experience focuses on reading. Access your synchronized notes from your phone without carrying your laptop, with editing intentionally reserved for desktop.
+
+---
+
+## ☁️ Cloud Synchronization
+
+Glyph has evolved beyond its original local-only architecture.
+
+Your notes can now be synchronized through the cloud, making them accessible across supported devices when you're signed in.
+
+The synchronization layer builds on Appwrite for authentication and data storage.
+
+### What this means
+
+- Access your notes from desktop and mobile.
+- Keep your documents available across devices.
+- Use desktop for editing and mobile for reading.
+- Install Glyph as a PWA instead of relying exclusively on a browser tab.
+
+Cloud synchronization introduces a remote dependency that wasn't present in the original local-only version.
+
+**Important:** Cloud synchronization requires network access to communicate with the remote service. Offline editing, conflict resolution, and automatic recovery of unsynchronized changes depend on the application's implementation and should not be assumed to work unless explicitly supported.
 
 ---
 
@@ -93,47 +139,67 @@ Glyph includes a Vim-inspired editing system built around three modes:
 
 Glyph is **not intended to be a complete Vim implementation**.
 
-Instead, it focuses on the parts of Vim navigation and editing that make Markdown writing faster and more enjoyable.
+Instead, it focuses on the navigation and editing operations that make Markdown writing faster and more enjoyable.
+
+Vim-style editing is available in the desktop editing experience. Mobile is designed for viewing notes rather than editing them.
+
+---
+
+## ⌨️ Command Menu
+
+Press `:` while in **Normal mode** to open the command menu.
+
+Depending on the available commands, you can:
+
+- Toggle the theme.
+- Toggle the sidebar.
+- Export the current note as Markdown.
+- Export the current note as PDF.
+- Switch between notes.
+
+The command menu keeps frequently used actions accessible without interrupting a keyboard-driven workflow.
 
 ---
 
 ## 🏗️ Architecture
 
-Glyph follows a feature-oriented separation between the application layer, UI, editor logic, state, and shared utilities.
+Glyph separates application routing, interface components, editor behavior, state management, and remote data access.
 
 ```text
-┌─────────────────────────────────────────────────┐
-│                    Next.js                      │
-│             Application / Routing               │
-└───────────────────────┬─────────────────────────┘
-                        │
-          ┌─────────────┴─────────────┐
-          │                           │
-          ▼                           ▼
-   ┌──────────────┐            ┌──────────────┐
-   │      UI      │            │    Editor    │
-   │              │            │              │
-   │ Components   │            │    Tiptap    │
-   │ Sidebar      │            │ Vim System   │
-   │ Commands     │            │ Extensions   │
-   │ Toolbar      │            │ Serialization │
-   └──────┬───────┘            └──────┬───────┘
-          │                           │
-          └─────────────┬─────────────┘
-                        ▼
-                 ┌──────────────┐
-                 │    State     │
-                 │              │
-                 │   Zustand    │
-                 │ Persistence  │
-                 └──────┬───────┘
-                        │
-                        ▼
-                 ┌──────────────┐
-                 │   Browser    │
-                 │              │
-                 │ Local Storage│
-                 └──────────────┘
+┌─────────────────────────────────────────────┐
+│                  Next.js                    │
+│             Application / Routing           │
+└──────────────────────┬──────────────────────┘
+                       │
+             ┌─────────┴─────────┐
+             │                   │
+             ▼                   ▼
+      ┌──────────────┐    ┌──────────────┐
+      │      UI      │    │    Editor    │
+      │              │    │              │
+      │ Sidebar      │    │    Tiptap    │
+      │ Commands     │    │ Vim System   │
+      │ Toolbar      │    │ Extensions   │
+      └──────┬───────┘    └──────┬───────┘
+             │                   │
+             └─────────┬─────────┘
+                       ▼
+                ┌──────────────┐
+                │    State     │
+                │              │
+                │   Zustand    │
+                │ React Query  │
+                └──────┬───────┘
+                       │
+                ┌──────┴───────┐
+                │              │
+                ▼              ▼
+         ┌────────────┐  ┌────────────┐
+         │   Local    │  │   Cloud    │
+         │   State    │  │   Appwrite │
+         │            │  │            │
+         │ Persistence│  │ Auth / Data│
+         └────────────┘  └────────────┘
 ```
 
 ### Main responsibilities
@@ -149,16 +215,16 @@ hook/
   Reusable React hooks
 
 lib/
-  Editor behavior, file operations, and utilities
+  Editor behavior, Appwrite client, and utilities
 
 store/
-  Application state and persisted notes
+  Application state and note-related state
 
 type/
   Shared TypeScript types
 ```
 
-The architecture keeps UI concerns separate from editor behavior and persistence, making individual parts easier to reason about and extend.
+The architecture keeps editor interactions separate from remote data operations, helping the application support distinct desktop and mobile experiences.
 
 ---
 
@@ -166,157 +232,133 @@ The architecture keeps UI concerns separate from editor behavior and persistence
 
 ### Why Next.js?
 
-Next.js provides the application structure, routing, build pipeline, and modern React environment required by the project without introducing unnecessary infrastructure.
+Next.js provides application routing, the build pipeline, and a modern React environment for a multi-device application.
 
 ### Why Tiptap?
 
-The editor requires rich-text behavior while still supporting Markdown-oriented workflows.
+Glyph needs rich-text editing while preserving a Markdown-oriented workflow.
 
-Tiptap provides a flexible ProseMirror-based foundation that makes custom extensions and editor behavior possible without implementing a rich-text engine from scratch.
+Tiptap provides a flexible ProseMirror-based foundation for custom extensions, structured documents, and editor behavior without requiring a rich-text engine to be built from scratch.
 
 ### Why Zustand?
 
-Glyph's state requirements are relatively small.
+Zustand provides lightweight state management for editor and interface state without the overhead of a larger state-management solution.
 
-Zustand provides a lightweight state model without the ceremony of a larger state-management solution, while its persistence middleware allows notes to survive browser sessions.
+### Why TanStack Query?
 
-### Why local-first?
+Remote notes and authentication introduce asynchronous operations, loading states, errors, and cache management.
 
-A backend would introduce authentication, databases, APIs, synchronization, hosting, and additional failure points.
+TanStack Query helps organize server-state fetching and mutations, making remote data interactions easier to manage.
 
-Glyph doesn't need those features to fulfill its primary purpose.
+### Why Appwrite?
 
-Keeping notes local makes the application:
-
-- Faster to start
-- Simpler to deploy
-- Usable without an account
-- Independent of a backend
-- More private by default
+Appwrite provides the backend services needed for authentication and cloud-stored notes, allowing Glyph to support signed-in users and cross-device access without building a custom backend from scratch.
 
 ### Why Vim-inspired editing?
 
-The target workflow is keyboard-heavy.
+Glyph targets users who spend much of their time at a keyboard.
 
-Vim-style navigation reduces the need to constantly move between the keyboard and mouse, making document navigation and editing more efficient for users already familiar with Vim.
+Vim-style navigation reduces unnecessary mouse interaction and makes editing more efficient for users already familiar with modal editing.
 
 ### Why TypeScript?
 
-The application contains several interacting systems—editor state, document state, commands, keyboard modes, and UI state.
+The application combines editor state, note data, authentication, remote mutations, and device-specific interfaces.
 
-TypeScript provides stronger contracts between these systems and makes refactoring safer as the codebase evolves.
+TypeScript provides stronger contracts between these systems and helps make refactoring safer as the codebase evolves.
 
 ---
 
 ## 🧩 Challenges & Solutions
 
-### 1. Building Vim-style editing inside a rich-text editor
+### 1. Implementing Vim-style editing in a rich-text editor
 
 **Challenge**
 
-Traditional Vim operates on text positions, while a rich-text editor has a structured document model containing paragraphs, headings, lists, links, code blocks, and other nodes.
+Traditional Vim operates on text positions, while rich-text editors represent content as structured documents containing paragraphs, headings, lists, links, and other nodes.
 
 **Solution**
 
-Glyph implements Vim-inspired behavior on top of the editor's document and selection model rather than attempting to recreate Vim's underlying text engine.
+Glyph implements Vim-inspired behavior on top of the editor's document and selection model, preserving the benefits of structured rich text while supporting familiar navigation.
 
-This allows familiar navigation while preserving the benefits of a structured rich-text document.
-
----
-
-### 2. Persisting multiple documents without a backend
+### 2. Moving from local-only storage to cloud synchronization
 
 **Challenge**
 
-Glyph needed multiple editable notes that survive page reloads without introducing authentication or server-side storage.
+The original application stored notes locally, which limited access to the browser and device where the notes were created.
 
 **Solution**
 
-Application state is managed through Zustand with persistence, allowing the note collection and active document state to be stored locally in the browser.
+Glyph now integrates Appwrite for remote data storage and authentication, allowing signed-in users to access their notes across devices.
 
-This keeps the architecture entirely client-side.
-
----
-
-### 3. Keeping keyboard workflows from interfering with normal editing
+### 3. Supporting desktop editing and mobile reading
 
 **Challenge**
 
-Global keyboard shortcuts can easily conflict with text input, browser behavior, and editor commands.
+Glyph's editing workflow relies on keyboard interaction and Vim motions, which are not well suited to a touch-first interface.
 
 **Solution**
 
-Keyboard handling is aware of the editor's current Vim mode and interaction context, allowing commands to be interpreted differently depending on whether the user is navigating, inserting, or selecting content.
+The application separates its experiences by device: desktop provides the editing workflow, while mobile focuses on accessing and reading notes.
 
----
-
-### 4. Keeping the interface minimal while exposing many actions
+### 4. Managing asynchronous remote state
 
 **Challenge**
 
-An editor needs many operations, but constantly displaying toolbars and controls works against a focused writing experience.
+Cloud-backed notes require handling loading states, failed requests, authentication, and mutations.
 
 **Solution**
 
-Glyph uses a command menu to make secondary actions available on demand while keeping the main editing surface visually clean.
+TanStack Query provides a structured approach to remote data fetching and mutations, while authentication guards control access to protected application areas.
+
+### 5. Keeping the interface focused
+
+**Challenge**
+
+An editor needs many actions, but constantly displaying every control makes the interface feel cluttered.
+
+**Solution**
+
+Glyph uses a command menu to keep secondary actions accessible on demand, preserving a minimal writing environment.
 
 ---
 
-## 💾 Local-first by Design
+## 💾 Data & Persistence
 
-Glyph deliberately avoids requiring a backend.
+Glyph combines local application state with remote storage to support its editing and synchronization workflows.
 
-Notes are persisted locally in the browser using **Zustand's persistence middleware**, allowing the application to work without accounts, servers, or cloud infrastructure.
+- **Local state:** Zustand manages application and editor-related state.
+- **Remote data:** Appwrite stores notes for authenticated access.
+- **Remote state management:** TanStack Query handles fetching and mutations.
+- **Authentication:** Appwrite manages user authentication.
 
-Notes are stored under the `glyph-notes` browser storage key.
+### Keep your notes safe
 
-### ⚠️ Important
+Cloud storage makes notes accessible across devices, but it should not be treated as a substitute for independent backups.
 
-Because your notes are stored locally:
+For important documents, export a Markdown copy and keep it somewhere safe.
 
-- Clearing browser site data can remove your notes.
-- Glyph currently does not provide cloud synchronization.
-- Glyph does not provide automatic backups.
-
-For important documents, export a Markdown copy to keep an additional backup.
-
-This trade-off is intentional:
-
-**Glyph prioritizes simplicity, privacy, and immediate usability over cloud-based infrastructure.**
-
----
-
-## ⌨️ Command Menu
-
-Press `:` while in **Normal mode** to open the command menu.
-
-From there you can:
-
-- Toggle the theme
-- Toggle the sidebar
-- Export the current note as Markdown
-- Export the current note as PDF
-- Switch between notes
-
-The command menu keeps frequently used actions accessible without interrupting a keyboard-driven workflow.
+Access to synchronized notes depends on the availability of the remote service, network connectivity, and valid authentication where required.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Technology         | Purpose                        |
-| ------------------ | ------------------------------ |
-| **Next.js 16**     | Application framework          |
-| **React 19**       | UI                             |
-| **TypeScript**     | Type-safe development          |
-| **Tiptap 3**       | Rich-text editor               |
-| **Zustand**        | State management & persistence |
-| **Tailwind CSS 4** | Styling                        |
-| **shadcn/ui**      | UI primitives                  |
-| **Lucide**         | Icons                          |
-| **Framer Motion**  | UI animations                  |
-| **Shiki**          | Syntax highlighting            |
-| **Sonner**         | Notifications                  |
+| Technology                    | Purpose                               |
+| ----------------------------- | ------------------------------------- |
+| **Next.js 16**                | Application framework                 |
+| **React 19**                  | UI                                    |
+| **TypeScript**                | Type-safe development                 |
+| **Tiptap 3**                  | Rich-text editor                      |
+| **Zustand**                   | Client-side state management          |
+| **TanStack Query**            | Remote data fetching and mutations    |
+| **Appwrite**                  | Authentication and cloud data storage |
+| **Tailwind CSS 4**            | Styling                               |
+| **shadcn/ui**                 | UI primitives                         |
+| **Lucide**                    | Icons                                 |
+| **Framer Motion**             | UI animations                         |
+| **Shiki**                     | Syntax highlighting                   |
+| **Sonner**                    | Notifications                         |
+| **Progressive Web App (PWA)** | Installable app experience            |
 
 ---
 
@@ -326,6 +368,7 @@ The command menu keeps frequently used actions accessible without interrupting a
 
 - **Node.js 20+**
 - **npm**, **pnpm**, **yarn**, or **Bun**
+- An Appwrite project configured for the application
 
 ### Installation
 
@@ -342,7 +385,21 @@ Install dependencies:
 npm install
 ```
 
-Start the development server:
+### Environment variables
+
+Configure the Appwrite environment variables required by the application:
+
+```env
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=
+NEXT_PUBLIC_APPWRITE_DB_ID=
+NEXT_PUBLIC_APPWRITE_DB_TABLE_ID=
+```
+
+Use the corresponding values from your Appwrite project. Configure the required authentication providers, database table, permissions, and allowed origins in the Appwrite console.
+
+Never put server secrets or private API keys in `NEXT_PUBLIC_` variables.
+
+### Start the development server
 
 ```bash
 npm run dev
@@ -375,8 +432,8 @@ npm run lint
 app/             Next.js routes and global styles
 component/       Editor, sidebar, toolbar, command menu, and UI
 hook/            Reusable React hooks
-lib/             Editor, file, and utility logic
-store/           Zustand stores and persisted note state
+lib/             Editor, Appwrite client, and utility logic
+store/           Zustand stores and client-side state
 type/            Shared TypeScript types
 screenshots/     Project screenshots
 ```
@@ -385,25 +442,15 @@ screenshots/     Project screenshots
 
 ## 🎯 Philosophy
 
-Glyph is intentionally small and focused.
+Glyph started as a local-only Markdown editor built around a focused, keyboard-driven desktop workflow.
 
-It doesn't try to become a collaborative workspace, project-management platform, or cloud document suite.
+It has evolved to make those notes accessible beyond a single browser and device, without losing the editing experience that defines it.
 
-**The editor is the product.**
+The goal remains simple: make Markdown editing feel like using a dedicated writing application rather than filling out a web form.
 
-The goal is to make Markdown editing feel closer to using a dedicated writing application than filling out a web form:
+**Fast editing. Minimal distractions. Synced notes. Access anywhere.**
 
-**fast, keyboard-friendly, visually polished, and local by default.**
-
-Every feature exists to support that workflow.
-
----
-
-## ⚠️ Desktop-first
-
-Glyph is currently designed for **desktop and laptop environments**.
-
-Its editing experience relies heavily on keyboard interaction and Vim-style motions, so touch devices are not currently supported.
+Glyph is not trying to become a project-management platform or a collaborative document suite. It focuses on making personal Markdown writing and reading feel natural across devices.
 
 ---
 
@@ -413,11 +460,11 @@ Glyph is open source and available under the [MIT License](LICENSE).
 
 ---
 
-## 🌐 Live Demo
+## 🌐 Links
 
 **[Try Glyph →](https://glyph-sigma.vercel.app)**
 
-No account required.
+**[GitHub Repository →](https://github.com/tasha-dev/glyph)**
 
 ---
 
