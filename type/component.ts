@@ -77,3 +77,12 @@ export interface DialogProps {
   open: boolean;
   onOpenChange?: (open: boolean) => void;
 }
+
+export interface AlertScreenProps {
+  title: string;
+  description: string;
+  variant: "default" | "destructive";
+}
+export interface LoadingScreenProps {
+  label: string;
+}

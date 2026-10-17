@@ -4,8 +4,6 @@ import { Query, type Models } from "appwrite";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2 } from "lucide-react";
-
 import {
   account,
   DATABASE_ID,
@@ -14,31 +12,33 @@ import {
 } from "@/lib/appwrite/client";
 import type { AuthGuardProps } from "@/type/component";
 import { AuthFetchProvider } from "@/context/authFetchContext";
-import { Alert, AlertDescription, AlertTitle } from "@/component/ui/alert";
-import { isUnauthorized } from "@/lib/util";
-import { DBNote } from "@/type/api";
 import { UserNotesProvider } from "@/context/userNotesContext";
+import { isUnauthorized } from "@/lib/util";
+import type { DBNote } from "@/type/api";
+import AlertScreen from "../ui/api/alertScreen";
+import LoadingScreen from "../ui/api/loadingScreen";
 
 export default function AuthGuard({
   children,
   mode = "auth-only",
 }: AuthGuardProps) {
   const router = useRouter();
-
-  const fetch = useQuery<Models.User<Models.Preferences>, Error>({
+  const authQuery = useQuery<Models.User<Models.Preferences>, Error>({
     queryKey: ["auth", "current-user"],
     queryFn: () => account.get(),
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  const userNotesFetch = useQuery<DBNote[], Error>({
-    queryKey: ["user", "user-notes", fetch.data?.$id],
-    enabled: !!fetch.data,
+  const user = authQuery.data;
+  const authenticated = authQuery.isSuccess && !!user;
+  const unauthorized = authQuery.isError && isUnauthorized(authQuery.error);
+
+  const notesQuery = useQuery<DBNote[], Error>({
+    queryKey: ["user", "user-notes", user?.$id],
+    enabled: authenticated && mode !== "no-auth-only",
     retry: false,
     queryFn: async (): Promise<DBNote[]> => {
-      const user = fetch.data;
-
       if (!user) {
         throw new Error("No authenticated user");
       }
@@ -64,81 +64,72 @@ export default function AuthGuard({
     },
   });
 
-  const { data: user, error, isPending, isError, isSuccess } = fetch;
-
-  const unauthorized = isError && isUnauthorized(error);
-  const authenticated = isSuccess && user !== undefined;
-
   useEffect(() => {
-    if (mode === "no-auth-only" && authenticated) {
-      router.replace("/");
+    if (mode === "auth-only" && unauthorized) {
+      router.replace("/login");
     }
-  }, [mode, authenticated, router]);
+  }, [mode, unauthorized, router]);
 
-  if (isPending || userNotesFetch.isPending) {
+  if (authQuery.isPending) {
+    return <LoadingScreen label="Checking authentication" />;
+  }
+
+  if (authQuery.isError && !unauthorized) {
     return (
-      <div
-        className="flex min-h-dvh items-center justify-center"
-        role="status"
-        aria-label="Checking authentication"
-      >
-        <Loader2 className="size-7 animate-spin text-primary" />
-      </div>
+      <AlertScreen
+        title="Authentication failed"
+        description="We couldn't verify your session. Please try again."
+        variant="destructive"
+      />
     );
   }
 
-  if (isError && !unauthorized) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center p-4">
-        <Alert variant="destructive" className="max-w-md">
-          <AlertCircle className="size-4" />
-          <AlertTitle>Authentication failed</AlertTitle>
-          <AlertDescription>
-            We couldn't verify your session. Please try again.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  if (unauthorized) {
+    switch (mode) {
+      case "auth-only":
+        return <LoadingScreen label="Redirecting to login" />;
+      case "no-auth-only":
+      case "disabled":
+        return (
+          <AuthFetchProvider value={authQuery}>
+            <UserNotesProvider value={notesQuery}>{children}</UserNotesProvider>
+          </AuthFetchProvider>
+        );
+    }
   }
 
-  if (userNotesFetch.isError) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center p-4">
-        <Alert variant="destructive" className="max-w-md">
-          <AlertCircle className="size-4" />
-          <AlertTitle>Failed On Notes</AlertTitle>
-          <AlertDescription>
-            We couldn't get your notes. Please try again.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  switch (mode) {
+    case "no-auth-only":
+      return (
+        <AlertScreen
+          title="Already signed in"
+          description="You are already signed in. Please continue to the application."
+          variant="default"
+        />
+      );
+
+    case "auth-only":
+    case "disabled":
+      break;
   }
 
-  const canRender =
-    mode === "disabled"
-      ? authenticated || unauthorized
-      : mode === "auth-only"
-        ? authenticated
-        : mode === "no-auth-only"
-          ? unauthorized
-          : false;
+  if (notesQuery.isPending) {
+    return <LoadingScreen label="Loading your notes" />;
+  }
 
-  if (!canRender) {
+  if (notesQuery.isError) {
     return (
-      <div
-        className="flex min-h-dvh items-center justify-center"
-        role="status"
-        aria-label="Redirecting"
-      >
-        <Loader2 className="size-7 animate-spin text-primary" />
-      </div>
+      <AlertScreen
+        title="Failed to load notes"
+        description="We couldn't retrieve your notes. Please try again."
+        variant="destructive"
+      />
     );
   }
 
   return (
-    <AuthFetchProvider value={fetch}>
-      <UserNotesProvider value={userNotesFetch}>{children}</UserNotesProvider>
+    <AuthFetchProvider value={authQuery}>
+      <UserNotesProvider value={notesQuery}>{children}</UserNotesProvider>
     </AuthFetchProvider>
   );
 }
