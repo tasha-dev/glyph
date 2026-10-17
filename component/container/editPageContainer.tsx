@@ -28,9 +28,10 @@ import { useIsMobile } from "@/hook/useIsMobile";
 
 export default function EditPageContainer() {
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const { disabled, activeNoteId, mode } = useEditorStore();
-  const { notes, updateNote } = useNotesStore();
+  const { disabled, activeNoteId, mode, updateContent } = useEditorStore();
+  const { notes } = useNotesStore();
   const { toggle, open } = useSideBarStore();
+
   const userFetch = useAuthFetch();
   const userNotes = useUserNotes();
   const isMobile = useIsMobile();
@@ -119,6 +120,7 @@ export default function EditPageContainer() {
                               key={index}
                               initialMarkdown={item.content}
                               disabled={disabled}
+                              onChange={updateContent}
                               ref={editorRef}
                             />
                           ),
@@ -131,9 +133,7 @@ export default function EditPageContainer() {
                               initialMarkdown={item.content}
                               disabled={disabled}
                               ref={editorRef}
-                              onChange={(content) => {
-                                updateNote(item.id, item.title, content);
-                              }}
+                              onChange={updateContent}
                             />
                           ),
                       )}

@@ -11,9 +11,16 @@ import useSideBarStore from "@/store/sidebar";
 import { useIsMobile } from "@/hook/useIsMobile";
 
 export default function NoteItem({ className, data }: NoteItemProps) {
-  const { setActiveNoteId, setMode } = useEditorStore();
+  const { setActiveNoteId, setMode, resetContent } = useEditorStore();
   const { toggle } = useSideBarStore();
   const isMobile = useIsMobile();
+
+  function openNote() {
+    setActiveNoteId(data.id);
+    toggle();
+    setMode("insert");
+    resetContent();
+  }
 
   return (
     <div
@@ -21,7 +28,7 @@ export default function NoteItem({ className, data }: NoteItemProps) {
         buttonVariants({
           variant: "secondary",
         }),
-        "flex items-center h-auto py-1.5 justify-between cursor-pointer",
+        "flex items-center h-auto py-1.5 justify-between cursor-pointer w-full max-w-full",
         className,
       )}
     >
@@ -49,31 +56,22 @@ export default function NoteItem({ className, data }: NoteItemProps) {
             variant="outline"
             data-vim-item
             size="icon"
-            onClick={() => {
-              setActiveNoteId(data.id);
-              toggle();
-              setMode("insert");
-            }}
+            onClick={openNote}
           >
             <Eye />
           </Button>
           <DeleteNote data={data} />
         </div>
       ) : (
-        <div className="shrink-0 flex items-center justify-end gap-2 w-full">
-          <Button
-            variant="outline"
-            data-vim-item
-            size="icon"
-            onClick={() => {
-              setActiveNoteId(data.id);
-              toggle();
-              setMode("insert");
-            }}
-          >
-            <Eye />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          data-vim-item
+          size="icon"
+          onClick={openNote}
+          className={"shrink-0"}
+        >
+          <Eye />
+        </Button>
       )}
     </div>
   );

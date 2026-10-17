@@ -106,8 +106,8 @@ export default function SideBar({ className }: ClassOnlyProps) {
               className,
             )}
           >
-            <ScrollArea className={"h-dvh"}>
-              <div className="flex items-center justify-between gap-2 p-4 border-b border-b-foreground/10">
+            <ScrollArea className={"h-dvh w-full"}>
+              <div className="flex items-center justify-between gap-2 p-4 border-b border-b-foreground/10 w-full">
                 <span className="font-semibold text-lg block truncate flex-1">
                   Your notes
                 </span>
