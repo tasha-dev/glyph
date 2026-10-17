@@ -45,20 +45,24 @@ export default function EditPageContainer() {
     return (
       <>
         <section>
-          <ScrollArea className={"h-dvh overflow-auto p-4 relative"}>
+          <main className={"p-4 relative"}>
             <SideBar className="z-30 print:hidden flex" />
-            <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10 print:hidden flex" />
-            <div
-              className={buttonVariants({
-                size: "default",
-                variant: "secondary",
-                className: "shadow-lg shadow-black/10 print:hidden flex",
-              })}
-            >
-              {activeNote.title}.md
+            <div className="fixed top-4 right-4 z-10 items-center justify-center gap-1 print:hidden flex">
+              <div
+                className={buttonVariants({
+                  size: "default",
+                  variant: "secondary",
+                  className: "shadow-lg shadow-black/10",
+                })}
+              >
+                {activeNote.title}.md
+              </div>
+              <Toolbar className="shadow-lg shadow-black/10" />
             </div>
-            <MarkdownRenderer>{activeNote.content}</MarkdownRenderer>
-          </ScrollArea>
+            <MarkdownRenderer className="pt-15 print:pt-0">
+              {activeNote.content}
+            </MarkdownRenderer>
+          </main>
         </section>
       </>
     );
@@ -74,7 +78,7 @@ export default function EditPageContainer() {
         <section className="relative z-0 print:hidden">
           <SideBar className="z-30" />
           <div inert={open ? true : undefined}>
-            <Toolbar className="fixed top-2 right-2 z-10 shadow-lg shadow-black/10" />
+            <Toolbar className="fixed top-4 right-4 z-10 shadow-lg shadow-black/10" />
             <main
               onClick={(e) => {
                 if (activeNote) {
@@ -148,9 +152,9 @@ export default function EditPageContainer() {
                         </EmptyMedia>
                         <EmptyTitle>Nothing to Show Yet</EmptyTitle>
                         <EmptyDescription>
-                          Choose a Markdown file from the left sidebar to begin
-                          editing <br /> or Start new file from there. <br />{" "}
-                          Your selected file will appear here.
+                          {isMobile
+                            ? "Choose a Markdown file from the sidebar to begin Viewing. Your selected file will appear here."
+                            : "Choose a Markdown file from the left sidebar to begin editing or Start new file from there. Your selected file will appear here."}
                         </EmptyDescription>
                       </EmptyHeader>
                       <EmptyContent className="flex-row justify-center gap-2">

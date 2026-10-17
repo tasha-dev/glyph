@@ -33,12 +33,14 @@ import { useAuthFetch } from "@/context/authFetchContext";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
 import Logout from "@/component/dialog/logout";
+import { useIsMobile } from "@/hook/useIsMobile";
 
 export default function Toolbar({ className }: ClassOnlyProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [logoutOpened, setLogoutOpened] = useState(false);
 
   const authFetch = useAuthFetch();
+  const isMobile = useIsMobile();
 
   const { theme, setTheme } = useTheme();
   const { notes } = useNotesStore();
@@ -105,16 +107,20 @@ export default function Toolbar({ className }: ClassOnlyProps) {
           <DropdownMenuItem className="cursor-pointer" onClick={toggle}>
             <PanelLeft />
             Toggle side bar
-            <DropdownMenuShortcut className="ml-auto">
-              <Kbd>s</Kbd>
-            </DropdownMenuShortcut>
+            {!isMobile && (
+              <DropdownMenuShortcut className="ml-auto">
+                <Kbd>s</Kbd>
+              </DropdownMenuShortcut>
+            )}
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={toggleTheme}>
             <SunMoon />
             Change Theme
-            <DropdownMenuShortcut className="ml-auto">
-              <Kbd>t</Kbd>
-            </DropdownMenuShortcut>
+            {!isMobile && (
+              <DropdownMenuShortcut className="ml-auto">
+                <Kbd>t</Kbd>
+              </DropdownMenuShortcut>
+            )}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
