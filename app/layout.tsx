@@ -117,7 +117,7 @@ export default function RootLayout({ children }: ChildrenOnlyProps) {
         className={cn(inter.className, vazir.className)}
       >
         <ThemeProvider>
-          <body className="overflow-hidden h-dvh w-dvw">
+          <body className="h-dvh w-dvw">
             <Toaster position="bottom-center" />
             <TooltipProvider>{children}</TooltipProvider>
           </body>
