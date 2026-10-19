@@ -7,7 +7,7 @@ import SideBar from "@/component/sidebar";
 import Toolbar from "@/component/toolbar";
 import useEditorStore from "@/store/editor";
 import useNotesStore from "@/store/notes";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Button, buttonVariants } from "@/component/ui/button";
 import {
    Empty,
@@ -48,7 +48,7 @@ export default function EditPageContainer() {
          <>
             <section>
                <main className={"p-4 relative"}>
-                  <SideBar className="z-30 print:hidden flex" />
+                  <SideBar className="print:hidden block" />
                   <div className="fixed top-4 right-4 z-10 items-center justify-center gap-1 print:hidden flex">
                      <div
                         className={buttonVariants({
@@ -80,7 +80,7 @@ export default function EditPageContainer() {
                </section>
             )}
             <section className="relative z-0 print:hidden">
-               <SideBar className="z-30" />
+               <SideBar />
                <div inert={open ? true : undefined}>
                   <Toolbar className="fixed top-4 right-4 z-10 shadow-lg shadow-black/10" />
                   <main
