@@ -12,12 +12,6 @@ import { cn, insertImageFile } from "@/lib/util";
 import { EditorProps } from "@/type/component";
 import { ScrollArea } from "@/component/ui/scroll-area";
 import { VimMode, SelectionWithModify, BlockCursorRect } from "@/type/editor";
-import {
-  applyOperator,
-  clearPendingSoon,
-  moveVertical,
-  resolveMotion,
-} from "@/lib/editor";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
@@ -30,45 +24,14 @@ import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import vesperTheme from "@/lib/vesperSyntaxTheme";
 import useEditorStore from "@/store/editor";
-
-const INSERT_CURSOR_WIDTH = 2;
-const SCROLL_MARGIN = 32;
-
-function getScrollableAncestor(el: HTMLElement | null): HTMLElement | null {
-  let node: HTMLElement | null = el;
-  while (node) {
-    if (node.hasAttribute("data-radix-scroll-area-viewport")) return node;
-    const style = window.getComputedStyle(node);
-    const canScrollY =
-      (style.overflowY === "auto" || style.overflowY === "scroll") &&
-      node.scrollHeight > node.clientHeight;
-    if (canScrollY) return node;
-    node = node.parentElement;
-  }
-  return null;
-}
-
-function scrollCursorIntoView(
-  wrapper: HTMLElement,
-  coords: { top: number; bottom: number; left: number; right: number },
-) {
-  const viewport = getScrollableAncestor(wrapper);
-  if (!viewport) return;
-
-  const viewportRect = viewport.getBoundingClientRect();
-
-  if (coords.top < viewportRect.top + SCROLL_MARGIN) {
-    viewport.scrollTop -= viewportRect.top + SCROLL_MARGIN - coords.top;
-  } else if (coords.bottom > viewportRect.bottom - SCROLL_MARGIN) {
-    viewport.scrollTop += coords.bottom - (viewportRect.bottom - SCROLL_MARGIN);
-  }
-
-  if (coords.left < viewportRect.left + SCROLL_MARGIN) {
-    viewport.scrollLeft -= viewportRect.left + SCROLL_MARGIN - coords.left;
-  } else if (coords.right > viewportRect.right - SCROLL_MARGIN) {
-    viewport.scrollLeft += coords.right - (viewportRect.right - SCROLL_MARGIN);
-  }
-}
+import {
+  applyOperator,
+  clearPendingSoon,
+  INSERT_CURSOR_WIDTH,
+  moveVertical,
+  resolveMotion,
+  scrollCursorIntoView,
+} from "@/lib/editor";
 
 export default function MarkdownEditor({
   initialMarkdown = "# Hello world",
