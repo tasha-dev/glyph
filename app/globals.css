@@ -131,6 +131,7 @@
    }
 
    .prose.prose-neutral pre {
+      direction: ltr !important;
       @apply overflow-auto w-full h-auto shadow-xs !bg-foreground/30 dark:!bg-neutral-800;
    }
 
